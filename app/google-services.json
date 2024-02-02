@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "447948623583",
+    "project_id": "mwin-e762b",
+    "storage_bucket": "mwin-e762b.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:447948623583:android:5ac510b9e352f9ca94e36a",
+        "android_client_info": {
+          "package_name": "com.playtime.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "447948623583-4agjlb1d81j1p701c0gnf1ods3r1qppi.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBLO7gO6Cd8SpcRyInq7xvVJ6RX-3zNhVY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "447948623583-4agjlb1d81j1p701c0gnf1ods3r1qppi.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
