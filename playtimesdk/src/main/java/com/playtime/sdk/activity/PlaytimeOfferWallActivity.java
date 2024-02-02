@@ -24,6 +24,7 @@ import android.provider.Settings;
 import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
+import android.webkit.JavascriptInterface;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
@@ -31,6 +32,7 @@ import android.webkit.WebViewClient;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatButton;
 
@@ -40,6 +42,7 @@ import com.playtime.sdk.utils.CommonUtils;
 import org.json.JSONArray;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -78,6 +81,10 @@ public class PlaytimeOfferWallActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         CommonUtils.setTheme(PlaytimeOfferWallActivity.this);
+        ActionBar actionBar = this.getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.hide();
+        }
         setContentView(R.layout.webview);
 
         appId = getIntent().getStringExtra("appId");
@@ -97,39 +104,9 @@ public class PlaytimeOfferWallActivity extends AppCompatActivity {
         webViewPage.getSettings().setDomStorageEnabled(true);
         webViewPage.getSettings().setLoadsImagesAutomatically(true);
         webViewPage.getSettings().setMixedContentMode(0);
+        JSInterface jsInterface = new JSInterface();
+        webViewPage.addJavascriptInterface(jsInterface, "Android");
         webViewPage.loadUrl(urlPage);
-        if (!isUsageStatsPermissionGranted()) {
-            requestUsageStatsPermission();
-        } else {
-            UsageStatsManager usageStatsManager = (UsageStatsManager) getSystemService(Context.USAGE_STATS_SERVICE);
-            long endTime = System.currentTimeMillis();
-            long startTime = endTime - 86400000L;
-            List<UsageStats> usageStatsList = usageStatsManager.queryUsageStats(0, startTime, endTime);
-            Set<String> userInstalledAppPackages = new HashSet();
-            Iterator var10 = usageStatsList.iterator();
-
-            while (var10.hasNext()) {
-                UsageStats usageStats = (UsageStats) var10.next();
-                String packageName = usageStats.getPackageName();
-                if (!isSystemApp(packageName) && !packageName.contains("com.google") && !packageName.contains("com.android") && !packageName.contains("com.gms")) {
-                    userInstalledAppPackages.add(packageName);
-                }
-            }
-
-            JSONArray jsonArray = new JSONArray(userInstalledAppPackages);
-            sendPackages(jsonArray);
-        }
-
-        webView = findViewById(R.id.webView);
-        webView.setVisibility(View.GONE);
-        WebSettings webSettings = webView.getSettings();
-        webSettings.setJavaScriptEnabled(true);
-        webSettings.setCacheMode(WebSettings.LOAD_CACHE_ELSE_NETWORK);
-        webSettings.setRenderPriority(WebSettings.RenderPriority.HIGH);
-        webSettings.setDomStorageEnabled(true);
-        webSettings.setLoadsImagesAutomatically(false);
-        webSettings.setMixedContentMode(0);
-        webView.setWebViewClient(new MyBrowserNew());
         webViewPage.setWebViewClient(new WebViewClient() {
             public boolean shouldOverrideUrlLoading(WebView view, String urlPage) {
                 if (CommonUtils.isNetworkAvailable(PlaytimeOfferWallActivity.this)) {
@@ -145,6 +122,54 @@ public class PlaytimeOfferWallActivity extends AppCompatActivity {
                 return true;
             }
         });
+
+        webView = findViewById(R.id.webView);
+        webView.setVisibility(View.GONE);
+        WebSettings webSettings = webView.getSettings();
+        webSettings.setJavaScriptEnabled(true);
+        webSettings.setCacheMode(WebSettings.LOAD_CACHE_ELSE_NETWORK);
+        webSettings.setRenderPriority(WebSettings.RenderPriority.HIGH);
+        webSettings.setDomStorageEnabled(true);
+        webSettings.setLoadsImagesAutomatically(false);
+        webSettings.setMixedContentMode(0);
+        webView.setWebViewClient(new MyBrowserNew());
+    }
+
+    public class JSInterface {
+        @JavascriptInterface
+        public void askAppUsageAccessPermission() {
+            if (!isUsageStatsPermissionGranted()) {
+                requestUsageStatsPermission();
+            } else {
+                UsageStatsManager usageStatsManager = (UsageStatsManager) getSystemService(Context.USAGE_STATS_SERVICE);
+                long endTime = System.currentTimeMillis();
+                long startTime = endTime - 86400000L;
+                List<UsageStats> usageStatsList = usageStatsManager.queryUsageStats(0, startTime, endTime);
+                Set<String> userInstalledAppPackages = new HashSet();
+                Iterator var10 = usageStatsList.iterator();
+
+                while (var10.hasNext()) {
+                    UsageStats usageStats = (UsageStats) var10.next();
+                    String packageName = usageStats.getPackageName();
+                    if (!isSystemApp(packageName) && !packageName.contains("com.google") && !packageName.contains("com.android") && !packageName.contains("com.gms")) {
+                        userInstalledAppPackages.add(packageName);
+                    }
+                }
+
+                JSONArray jsonArray = new JSONArray(userInstalledAppPackages);
+                sendPackages(jsonArray);
+            }
+        }
+
+        @JavascriptInterface
+        public void showToast(String message) {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    CommonUtils.setToast(PlaytimeOfferWallActivity.this, message);
+                }
+            });
+        }
     }
 
     private boolean isUsageStatsPermissionGranted() {
