@@ -31,6 +31,8 @@ public class SplashScreenActivity extends AppCompatActivity {
                 if (PlaytimeSDK.getInstance().isInitialized()) {
                     PlaytimeSDK.getInstance().open(SplashScreenActivity.this);
                 } else {
+                    PlaytimeSDK.getInstance().destroy();
+                    app.initPlaytimeSDK();
                     CommonUtils.setToast(SplashScreenActivity.this, "PlaytimeSDK is not initialized");
                 }
             }

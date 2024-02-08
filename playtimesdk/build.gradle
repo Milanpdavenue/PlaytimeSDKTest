@@ -7,21 +7,27 @@ android {
     compileSdk 34
 
     defaultConfig {
-        minSdk 24
+        minSdk 19
         targetSdk 34
         versionCode 1
         versionName "1.0.0"
         buildConfigField 'String', 'VERSION_NAME', "\"1.0.0\""
+        aarMetadata {
+            minCompileSdk = 34
+        }
+    }
+    testFixtures {
+        enable = true
     }
 
     buildTypes {
         release {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'lib-proguard-rules.pro'
         }
         debug {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'lib-proguard-rules.pro'
         }
     }
     compileOptions {
@@ -44,4 +50,5 @@ dependencies {
     implementation 'com.squareup.retrofit2:retrofit:2.9.0'
     implementation 'com.squareup.retrofit2:converter-gson:2.9.0'
     implementation 'com.squareup.okhttp3:logging-interceptor:5.0.0-alpha.2'
+    implementation 'androidx.browser:browser:1.7.0'
 }
