@@ -270,6 +270,8 @@ public *;
 
 # ALSO REMEMBER KEEPING YOUR MODEL CLASSES
 -keep class com.playtime.sdk.models.** { *; }
+-keep class com.playtime.sdk.listeners.OfferWallInitListener
+-keep class com.playtime.sdk.PlaytimeSDK
 
 ### RxJava, RxAndroid (https://gist.github.com/kosiara/487868792fbd3214f9c9)
 -keep class rx.schedulers.Schedulers {
