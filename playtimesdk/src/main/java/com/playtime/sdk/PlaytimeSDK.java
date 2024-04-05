@@ -1,5 +1,6 @@
 package com.playtime.sdk;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
@@ -47,7 +48,7 @@ public class PlaytimeSDK {
     private Context context;
     private OfferWallInitListener listener;
     private static PlaytimeSDK instance;
-
+    public static BroadcastReceiver packageInstallBroadcast;
     public PlaytimeSDK() {
     }
 
@@ -60,6 +61,10 @@ public class PlaytimeSDK {
             }
         }
         return instance;
+    }
+
+    public void destroy() {
+        instance = null;
     }
 
     public void init(Context context, String appIdStr, String userIdStr, OfferWallInitListener listener) {

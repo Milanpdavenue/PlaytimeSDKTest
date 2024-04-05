@@ -31,7 +31,7 @@ public class ApplicationController extends Application {
 
     public void initPlaytimeSDK() {
         String userID = "1";
-        String applicationKey = "asd2345tyhngb567";
+        String applicationKey = "1d21770a696167eb";
         PlaytimeSDK.getInstance().init(mContext, applicationKey, userID, new OfferWallInitListener() {
             @Override
             public void onInitSuccess() {
