@@ -12,4 +12,7 @@ public interface ApiInterface {
     @FormUrlEncoded
     @POST("DIGBEIW")
     Call<ApiResponse> verifyAppId(@Header("Token") String token, @Header("Secret") String random, @Field("details") String details);
+    @FormUrlEncoded
+    @POST("SDBGJOU")
+    Call<ApiResponse> UpdateInstalledOfferStatusAsync(@Header("Token") String token, @Header("Secret") String random, @Field("details") String details);
 }
