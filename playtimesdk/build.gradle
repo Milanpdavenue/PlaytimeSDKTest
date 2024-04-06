@@ -67,22 +67,7 @@ java {
     sourceCompatibility = JavaVersion.VERSION_17            // << --- ADD This
     targetCompatibility = JavaVersion.VERSION_17
 }
-// 5. Publishing:
-publishing {
-    publications {
-        maven(MavenPublication) {
-            groupId = 'com.github.Milanpdavenue'
-            artifactId = 'PlaytimeSDKTest'
-            version = "1.0.0"
-            pom {
-                description = 'First PlaytimeSDK'
-            }
-        }
-    }
-    repositories {               // << --- ADD This
-        mavenLocal()
-    }
-}
+
 dependencies {
     implementation 'androidx.appcompat:appcompat:1.6.1'
     implementation 'com.google.android.material:material:1.11.0'
@@ -95,4 +80,33 @@ dependencies {
     implementation 'com.squareup.retrofit2:converter-gson:2.9.0'
     implementation 'com.squareup.okhttp3:logging-interceptor:5.0.0-alpha.2'
     implementation 'androidx.browser:browser:1.8.0'
+}
+//// 5. Publishing:
+//publishing {
+//    publications {
+//        maven(MavenPublication) {
+//            groupId = 'com.github.Milanpdavenue'
+//            artifactId = 'PlaytimeSDKTest'
+//            version = "1.0.0"
+//            pom {
+//                description = 'First PlaytimeSDK'
+//            }
+//        }
+//    }
+//    repositories {               // << --- ADD This
+//        mavenLocal()
+//    }
+//}
+afterEvaluate{
+    publishing{
+        publications{
+            release(MavenPublication){
+                from components.findByName('release')
+
+                groupId = 'com.github.Milanpdavenue'
+                artifactId = 'PlaytimeSDKTest'
+                version = "1.0.0"
+            }
+        }
+    }
 }
