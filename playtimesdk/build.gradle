@@ -21,16 +21,16 @@ plugins {
 
 android {
     namespace 'com.playtime.sdk'
-    compileSdk 34
+    compileSdk 33
 
     defaultConfig {
         minSdk 23
-        targetSdk 34
+        targetSdk 33
         versionCode 1
         versionName "1.0.0"
         buildConfigField 'String', 'VERSION_NAME', "\"1.0.0\""
         aarMetadata {
-            minCompileSdk = 34
+            minCompileSdk = 33
         }
     }
     testFixtures {
@@ -42,13 +42,13 @@ android {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             consumerProguardFiles 'proguard-rules.pro'
-            consumerProguardFiles 'consumer-rules.pro'       // << --- ADD This
+//            consumerProguardFiles 'consumer-rules.pro'       // << --- ADD This
         }
         debug {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             consumerProguardFiles 'proguard-rules.pro'
-            consumerProguardFiles 'consumer-rules.pro'       // << --- ADD This
+//            consumerProguardFiles 'consumer-rules.pro'       // << --- ADD This
         }
     }
     buildFeatures {
