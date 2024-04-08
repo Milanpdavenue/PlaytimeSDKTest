@@ -9,7 +9,10 @@ buildscript {
 
     dependencies {
         classpath 'com.android.tools.build:gradle:7.1.3'
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+        classpath 'com.google.gms:google-services:4.4.0'
+        classpath 'com.google.firebase:firebase-crashlytics-gradle:2.9.2'
+        classpath 'com.google.firebase:perf-plugin:1.4.2'
+//        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
     }
 }
 
@@ -27,8 +30,8 @@ android {
         minSdk 23
         targetSdk 33
         versionCode 1
-        versionName "1.0.47"
-        buildConfigField 'String', 'VERSION_NAME', "\"1.0.47\""
+        versionName "1.0.48"
+        buildConfigField 'String', 'VERSION_NAME', "\"1.0.48\""
         aarMetadata {
             minCompileSdk = 33
         }
@@ -78,7 +81,7 @@ publishing {
         maven(MavenPublication) {
             groupId = 'com.github.Milanpdavenue'
             artifactId = 'PlaytimeSDKTest'
-            version = "1.0.47"
+            version = "1.0.48"
             pom {
                 description = 'First PlaytimeSDK'
             }
