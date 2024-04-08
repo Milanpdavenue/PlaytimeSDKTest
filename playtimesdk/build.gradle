@@ -27,8 +27,8 @@ android {
         minSdk 23
         targetSdk 33
         versionCode 1
-        versionName "1.0.38"
-        buildConfigField 'String', 'VERSION_NAME', "\"1.0.38\""
+        versionName "1.0.40"
+        buildConfigField 'String', 'VERSION_NAME', "\"1.0.40\""
         aarMetadata {
             minCompileSdk = 33
         }
@@ -80,34 +80,34 @@ dependencies {
     api 'androidx.browser:browser:1.5.0'
 }
 //// 5. Publishing:
-//publishing {
-//    publications {
-//        maven(MavenPublication) {
-//            groupId = 'com.github.Milanpdavenue'
-//            artifactId = 'PlaytimeSDKTest'
-//            version = "1.0.36"
-//            pom {
-//                description = 'First PlaytimeSDK'
-//            }
-//        }
-//    }
-//    repositories {               // << --- ADD This
-//        mavenLocal()
-//    }
-//}
-afterEvaluate {
-    publishing {
-        publications {
-            release(MavenPublication) {
-                from components.findByName('release')
-
-                groupId = 'com.github.Milanpdavenue'
-                artifactId = 'PlaytimeSDKTest'
-                version = "1.0.38"
+publishing {
+    publications {
+        maven(MavenPublication) {
+            groupId = 'com.github.Milanpdavenue'
+            artifactId = 'PlaytimeSDKTest'
+            version = "1.0.40"
+            pom {
+                description = 'First PlaytimeSDK'
             }
         }
-        repositories {               // << --- ADD This
-            mavenLocal()
-        }
+    }
+    repositories {               // << --- ADD This
+        mavenLocal()
     }
 }
+//afterEvaluate {
+//    publishing {
+//        publications {
+//            release(MavenPublication) {
+//                from components.findByName('release')
+//
+//                groupId = 'com.github.Milanpdavenue'
+//                artifactId = 'PlaytimeSDKTest'
+//                version = "1.0.38"
+//            }
+//        }
+//        repositories {               // << --- ADD This
+//            mavenLocal()
+//        }
+//    }
+//}
