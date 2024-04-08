@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.github.Milanpdavenue</groupId>
   <artifactId>PlaytimeSDKTest</artifactId>
-  <version>1.0.30</version>
-  <packaging>aar</packaging>
+  <version>1.0.31</version>
+  <packaging>pom</packaging>
   <description>First PlaytimeSDK</description>
 </project>
