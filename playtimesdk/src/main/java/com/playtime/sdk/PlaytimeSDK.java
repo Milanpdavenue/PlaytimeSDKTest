@@ -84,7 +84,11 @@ public class PlaytimeSDK {
         this.appId = appIdStr;
         this.userId = userIdStr;
         this.listener = listener;
-        (new GetAdvertisingIdTask(context)).execute(new Void[0]);
+        try {
+            (new GetAdvertisingIdTask(context)).execute(new Void[0]);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public boolean isInitialized() {
@@ -168,8 +172,7 @@ public class PlaytimeSDK {
                         });
                 AdvertisingIdClient.Info adInfo = AdvertisingIdClient.getAdvertisingIdInfo(this.context);
                 gaIdStr = adInfo.getId();
-            } catch (GooglePlayServicesRepairableException | IOException |
-                     GooglePlayServicesNotAvailableException var4) {
+            } catch (Exception var4) {
                 var4.printStackTrace();
             }
             return gaIdStr;
