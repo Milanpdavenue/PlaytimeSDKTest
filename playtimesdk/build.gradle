@@ -32,8 +32,8 @@ android {
         minSdk 23
         targetSdk 33
         versionCode 1
-        versionName "1.0.48"
-        buildConfigField 'String', 'VERSION_NAME', "\"1.0.48\""
+        versionName "1.0.50"
+        buildConfigField 'String', 'VERSION_NAME', "\"1.0.50\""
         aarMetadata {
             minCompileSdk = 33
         }
