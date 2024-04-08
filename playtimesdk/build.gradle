@@ -19,6 +19,8 @@ buildscript {
 // 2. Modify Plugins:
 plugins {
     id 'com.android.library'
+    id 'com.google.gms.google-services'
+    id 'com.google.firebase.crashlytics'
     id 'maven-publish'          // << --- ADD This
 }
 
