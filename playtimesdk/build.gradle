@@ -27,8 +27,8 @@ android {
         minSdk 23
         targetSdk 33
         versionCode 1
-        versionName "1.0.0"
-        buildConfigField 'String', 'VERSION_NAME', "\"1.0.0\""
+        versionName "1.0.30"
+        buildConfigField 'String', 'VERSION_NAME', "\"1.0.30\""
         aarMetadata {
             minCompileSdk = 33
         }
@@ -103,7 +103,7 @@ afterEvaluate{
 
                 groupId = 'com.github.Milanpdavenue'
                 artifactId = 'PlaytimeSDKTest'
-                version = "1.0.29"
+                version = "1.0.30"
             }
         }
     }
