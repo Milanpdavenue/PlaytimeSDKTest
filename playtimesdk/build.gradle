@@ -27,8 +27,8 @@ android {
         minSdk 23
         targetSdk 33
         versionCode 1
-        versionName "1.0.40"
-        buildConfigField 'String', 'VERSION_NAME', "\"1.0.40\""
+        versionName "1.0.43"
+        buildConfigField 'String', 'VERSION_NAME', "\"1.0.43\""
         aarMetadata {
             minCompileSdk = 33
         }
@@ -65,7 +65,22 @@ java {
     sourceCompatibility = JavaVersion.VERSION_17            // << --- ADD This
     targetCompatibility = JavaVersion.VERSION_17
 }
-
+// 5. Publishing:
+publishing {
+    publications {
+        maven(MavenPublication) {
+            groupId = 'com.github.Milanpdavenue'
+            artifactId = 'PlaytimeSDKTest'
+            version = "1.0.43"
+            pom {
+                description = 'First PlaytimeSDK'
+            }
+        }
+    }
+    repositories {               // << --- ADD This
+        mavenLocal()
+    }
+}
 dependencies {
     api 'androidx.appcompat:appcompat:1.5.1'
     api 'com.google.android.material:material:1.6.1'
@@ -79,22 +94,7 @@ dependencies {
     api 'com.squareup.okhttp3:logging-interceptor:5.0.0-alpha.2'
     api 'androidx.browser:browser:1.5.0'
 }
-//// 5. Publishing:
-publishing {
-    publications {
-        maven(MavenPublication) {
-            groupId = 'com.github.Milanpdavenue'
-            artifactId = 'PlaytimeSDKTest'
-            version = "1.0.40"
-            pom {
-                description = 'First PlaytimeSDK'
-            }
-        }
-    }
-    repositories {               // << --- ADD This
-        mavenLocal()
-    }
-}
+
 //afterEvaluate {
 //    publishing {
 //        publications {
@@ -103,7 +103,7 @@ publishing {
 //
 //                groupId = 'com.github.Milanpdavenue'
 //                artifactId = 'PlaytimeSDKTest'
-//                version = "1.0.38"
+//                version = "1.0.41"
 //            }
 //        }
 //        repositories {               // << --- ADD This

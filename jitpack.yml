@@ -2,11 +2,20 @@
 jdk:
   - openjdk17
 before_install:
-  - echo "Running a custom install command"
   - ./scripts/prepareJitpackEnvironment.sh
-#install:
-  #  - ./gradlew clean install -xtest
+install:
   - FILE="-Dfile=playtimesdk-release.aar"
-  - mvn install:install-file $FILE -DgroupId=com.github.Milanpdavenue -DartifactId=PlaytimeSDKTest -Dversion=1.0.40 -Dpackaging=aar -DgeneratePom=true
+  - mvn install:install-file $FILE -DgroupId=com.github.Milanpdavenue -DartifactId=PlaytimeSDKTest -Dversion=1.0.43 -Dpackaging=aar -DgeneratePom=true
+
+# configuration file for building snapshots and releases with jitpack.io
+#jdk:
+#  - openjdk17
+#before_install:
+#  - echo "Running a custom install command"
+#  - ./scripts/prepareJitpackEnvironment.sh
+#install:
+#  - ./gradlew clean install -xtest
+#  - FILE="-Dfile=playtimesdk-release.aar"
+#  - mvn install:install-file $FILE -DgroupId=com.github.Milanpdavenue -DartifactId=PlaytimeSDKTest -Dversion=1.0.41 -Dpackaging=aar -DgeneratePom=true
 #  - mvn install:install-file $FILE -DgroupId=com.github.Milanpdavenue -DartifactId=PlaytimeSDKTest -Dversion=1.0.36 -Dpackaging=aar -DpomFile=pom.xml
 #  - mvn install:install-file $FILE -Dpackaging=aar -DpomFile=pom.xml
