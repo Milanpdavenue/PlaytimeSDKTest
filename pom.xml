@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.github.Milanpdavenue</groupId>
   <artifactId>PlaytimeSDKTest</artifactId>
-  <version>1.0.45</version>
+  <version>1.0.46</version>
   <packaging>pom</packaging>
   <description>First PlaytimeSDK</description>
   <dependencies>
@@ -25,18 +25,13 @@
     </dependency>
     <dependency>
       <groupId>com.google.firebase</groupId>
-      <artifactId>firebase-bom</artifactId>
-      <version>29.3.1</version>
-    </dependency>
-    <dependency>
-      <groupId>com.google.firebase</groupId>
       <artifactId>firebase-core</artifactId>
-      <version/>
+      <version>20.1.2</version>
     </dependency>
     <dependency>
       <groupId>com.google.firebase</groupId>
       <artifactId>firebase-messaging</artifactId>
-      <version/>
+      <version>23.0.3</version>
     </dependency>
     <dependency>
       <groupId>com.squareup.retrofit2</groupId>

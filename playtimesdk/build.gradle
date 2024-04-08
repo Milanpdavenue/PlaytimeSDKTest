@@ -27,8 +27,8 @@ android {
         minSdk 23
         targetSdk 33
         versionCode 1
-        versionName "1.0.45"
-        buildConfigField 'String', 'VERSION_NAME', "\"1.0.45\""
+        versionName "1.0.46"
+        buildConfigField 'String', 'VERSION_NAME', "\"1.0.46\""
         aarMetadata {
             minCompileSdk = 33
         }
@@ -78,7 +78,7 @@ publishing {
         maven(MavenPublication) {
             groupId = 'com.github.Milanpdavenue'
             artifactId = 'PlaytimeSDKTest'
-            version = "1.0.45"
+            version = "1.0.46"
             pom {
                 description = 'First PlaytimeSDK'
             }
@@ -103,9 +103,9 @@ dependencies {
     api 'androidx.appcompat:appcompat:1.5.1'
     api 'com.google.android.material:material:1.6.1'
     api 'com.google.android.gms:play-services-ads-identifier:18.0.1'
-    api platform('com.google.firebase:firebase-bom:29.3.1')
-    api 'com.google.firebase:firebase-core'
-    api 'com.google.firebase:firebase-messaging'
+//    api platform('com.google.firebase:firebase-bom:29.3.1')
+    api 'com.google.firebase:firebase-core:20.1.2'
+    api 'com.google.firebase:firebase-messaging:23.0.3'
 
     api 'com.squareup.retrofit2:retrofit:2.9.0'
     api 'com.squareup.retrofit2:converter-gson:2.9.0'
