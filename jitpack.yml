@@ -5,6 +5,8 @@ before_install:
   - echo "Running a custom install command"
   - ./scripts/prepareJitpackEnvironment.sh
 install:
-#  - ./gradlew clean install -xtest
+  #  - ./gradlew clean install -xtest
   - FILE="-Dfile=playtimesdk-release.aar"
-  - mvn install:install-file $FILE -DgroupId=com.github.Milanpdavenue -DartifactId=PlaytimeSDKTest -Dversion=1.0.0 -Dpackaging=aar -DgeneratePom=true
+#  - mvn install:install-file $FILE -DgroupId=com.github.Milanpdavenue -DartifactId=PlaytimeSDKTest -Dversion=1.0.0 -Dpackaging=aar -DgeneratePom=true
+#  - mvn install:install-file $FILE -DgroupId=com.github.Milanpdavenue -DartifactId=PlaytimeSDKTest -Dversion=1.0.0 -Dpackaging=aar -DpomFile=pom.xml
+  - mvn install:install-file $FILE -Dpackaging=aar -DpomFile=pom.xml

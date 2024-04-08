@@ -242,6 +242,7 @@ public *;
 -dontwarn retrofit.appengine.UrlFetchClient
 -keepattributes Signature
 -keepattributes Exceptions
+-keepattributes *Annotation*
 -keepclasseswithmembers class * {
     @retrofit.http.* <methods>;
 }

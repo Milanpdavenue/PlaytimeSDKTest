@@ -41,14 +41,12 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-            consumerProguardFiles 'proguard-rules.pro'
-//            consumerProguardFiles 'consumer-rules.pro'       // << --- ADD This
+            consumerProguardFiles 'consumer-rules.pro'// << --- ADD This
         }
         debug {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-            consumerProguardFiles 'proguard-rules.pro'
-//            consumerProguardFiles 'consumer-rules.pro'       // << --- ADD This
+            consumerProguardFiles 'consumer-rules.pro'// << --- ADD This
         }
     }
     buildFeatures {
