@@ -27,8 +27,8 @@ android {
         minSdk 23
         targetSdk 33
         versionCode 1
-        versionName "1.0.35"
-        buildConfigField 'String', 'VERSION_NAME', "\"1.0.35\""
+        versionName "1.0.37"
+        buildConfigField 'String', 'VERSION_NAME', "\"1.0.37\""
         aarMetadata {
             minCompileSdk = 33
         }
@@ -85,7 +85,7 @@ dependencies {
 //        maven(MavenPublication) {
 //            groupId = 'com.github.Milanpdavenue'
 //            artifactId = 'PlaytimeSDKTest'
-//            version = "1.0.0"
+//            version = "1.0.36"
 //            pom {
 //                description = 'First PlaytimeSDK'
 //            }
@@ -95,16 +95,19 @@ dependencies {
 //        mavenLocal()
 //    }
 //}
-afterEvaluate{
-    publishing{
-        publications{
-            release(MavenPublication){
+afterEvaluate {
+    publishing {
+        publications {
+            release(MavenPublication) {
                 from components.findByName('release')
 
                 groupId = 'com.github.Milanpdavenue'
                 artifactId = 'PlaytimeSDKTest'
-                version = "1.0.35"
+                version = "1.0.37"
             }
+        }
+        repositories {               // << --- ADD This
+            mavenLocal()
         }
     }
 }
