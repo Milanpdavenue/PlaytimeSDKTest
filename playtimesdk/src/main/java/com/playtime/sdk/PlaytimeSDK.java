@@ -8,6 +8,7 @@ import android.os.Build;
 import android.provider.Settings;
 import android.util.Log;
 
+import androidx.annotation.Keep;
 import androidx.annotation.NonNull;
 
 import com.google.android.gms.ads.identifier.AdvertisingIdClient;
@@ -36,7 +37,7 @@ import java.net.URLEncoder;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-
+@Keep
 public class PlaytimeSDK {
     private final String baseUrl = "https://appcampaign.in/playtime_sdk/web_view/index.php";
     private String defaultUrl;
