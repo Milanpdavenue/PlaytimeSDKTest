@@ -1,9 +1,11 @@
 package com.playtime.sdk.models;
 
+import androidx.annotation.Keep;
+
 import com.google.gson.annotations.SerializedName;
 
 import java.io.Serializable;
-
+@Keep
 public class ApiResponse implements Serializable {
     @SerializedName("encrypt")
     private String encrypt;

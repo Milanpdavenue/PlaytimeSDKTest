@@ -1,8 +1,9 @@
 package com.playtime.sdk.models;
 
-import com.google.gson.annotations.Expose;
+import androidx.annotation.Keep;
 
-@SuppressWarnings("unused")
+import com.google.gson.annotations.Expose;
+@Keep
 public class ResponseModel {
     @Expose
     private String message;
