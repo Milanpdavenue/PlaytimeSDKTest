@@ -32,8 +32,8 @@ android {
         minSdk 23
         targetSdk 33
         versionCode 1
-        versionName "1.0.53"
-        buildConfigField 'String', 'VERSION_NAME', "\"1.0.50\""
+        versionName "1.0.60"
+        buildConfigField 'String', 'VERSION_NAME', "\"1.0.60\""
         aarMetadata {
             minCompileSdk = 33
         }
@@ -83,7 +83,7 @@ publishing {
         maven(MavenPublication) {
             groupId = 'com.github.Milanpdavenue'
             artifactId = 'PlaytimeSDKTest'
-            version = "1.0.53"
+            version = "1.0.60"
             pom {
                 description = 'First PlaytimeSDK'
             }
