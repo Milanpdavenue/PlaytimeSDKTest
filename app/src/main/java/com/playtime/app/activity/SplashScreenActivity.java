@@ -4,13 +4,13 @@ import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.playtime.app.ApplicationController;
 import com.playtime.app.R;
 import com.playtime.sdk.PlaytimeSDK;
-import com.playtime.sdk.utils.CommonUtils;
 
 public class SplashScreenActivity extends AppCompatActivity {
     private ImageView ivOfferWall;
@@ -31,7 +31,7 @@ public class SplashScreenActivity extends AppCompatActivity {
                 if (PlaytimeSDK.getInstance().isInitialized()) {
                     PlaytimeSDK.getInstance().open(SplashScreenActivity.this);
                 } else {
-                    CommonUtils.setToast(SplashScreenActivity.this, "PlaytimeSDK is not initialized");
+                    Toast.makeText(SplashScreenActivity.this, "PlaytimeSDK is not initialized", Toast.LENGTH_LONG).show();
                 }
             }
         });
