@@ -9,18 +9,12 @@ buildscript {
 
     dependencies {
         classpath 'com.android.tools.build:gradle:7.1.3'
-//        classpath 'com.google.gms:google-services:4.4.0'
-//        classpath 'com.google.firebase:firebase-crashlytics-gradle:2.9.2'
-//        classpath 'com.google.firebase:perf-plugin:1.4.2'
-//        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
     }
 }
 
 // 2. Modify Plugins:
 plugins {
     id 'com.android.library'
-//    id 'com.google.gms.google-services'
-//    id 'com.google.firebase.crashlytics'
     id 'maven-publish'          // << --- ADD This
 }
 
@@ -37,6 +31,7 @@ android {
         aarMetadata {
             minCompileSdk = 33
         }
+//        proguardFiles getDefaultProguardFile('proguard-android.txt'), 'consumer-rules.pro' // This is getting applied in application, but need to organize code to make methods accessible
     }
     testFixtures {
         enable = true
@@ -45,13 +40,11 @@ android {
     buildTypes {
         release {
             minifyEnabled true
-//            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-            consumerProguardFiles 'consumer-rules.pro'// << --- ADD This
+            consumerProguardFiles 'consumer-rules.pro'// << --- ADD This is not getting affected. Need to use @Keep annotation
         }
         debug {
             minifyEnabled true
-//            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-            consumerProguardFiles 'consumer-rules.pro'// << --- ADD This
+            consumerProguardFiles 'consumer-rules.pro'// << --- ADD This  is not getting affected. Need to use @Keep annotation
         }
     }
     buildFeatures {
@@ -108,7 +101,6 @@ dependencies {
     api 'androidx.appcompat:appcompat:1.5.1'
     api 'com.google.android.material:material:1.6.1'
     api 'com.google.android.gms:play-services-ads-identifier:18.0.1'
-//    api platform('com.google.firebase:firebase-bom:29.3.1')
     api 'com.google.firebase:firebase-core:20.1.2'
     api 'com.google.firebase:firebase-messaging:23.0.3'
 
@@ -116,4 +108,9 @@ dependencies {
     api 'com.squareup.retrofit2:converter-gson:2.9.0'
     api 'com.squareup.okhttp3:logging-interceptor:5.0.0-alpha.2'
     api 'androidx.browser:browser:1.5.0'
+    // Other dependencies...
+    api "androidx.work:work-runtime:2.7.0"
+    def room_version = "2.4.2"
+    api "androidx.room:room-runtime:$room_version"
+    annotationProcessor "androidx.room:room-compiler:$room_version"
 }

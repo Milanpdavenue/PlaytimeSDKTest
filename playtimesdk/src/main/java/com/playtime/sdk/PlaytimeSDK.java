@@ -12,8 +12,6 @@ import androidx.annotation.Keep;
 import androidx.annotation.NonNull;
 
 import com.google.android.gms.ads.identifier.AdvertisingIdClient;
-import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
-import com.google.android.gms.common.GooglePlayServicesRepairableException;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.messaging.FirebaseMessaging;
@@ -27,16 +25,17 @@ import com.playtime.sdk.network.ApiInterface;
 import com.playtime.sdk.utils.CommonUtils;
 import com.playtime.sdk.utils.Constants;
 import com.playtime.sdk.utils.Encryption;
+import com.playtime.sdk.utils.SharePrefs;
 
 import org.json.JSONObject;
 
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
+
 @Keep
 public class PlaytimeSDK {
     private final String baseUrl = "https://appcampaign.in/playtime_sdk/web_view/index.php";
@@ -50,6 +49,8 @@ public class PlaytimeSDK {
     private OfferWallInitListener listener;
     private static PlaytimeSDK instance;
     public static BroadcastReceiver packageInstallBroadcast;
+    public static BroadcastReceiver deviceStatusBroadcast;
+
     public PlaytimeSDK() {
     }
 
@@ -90,6 +91,7 @@ public class PlaytimeSDK {
         } catch (Exception e) {
             e.printStackTrace();
         }
+        AppTrackingSetup.startAppTracking(context);
     }
 
     public boolean isInitialized() {
@@ -232,6 +234,11 @@ public class PlaytimeSDK {
             ResponseModel responseModel = new Gson().fromJson(new String(cipher.decrypt(apiResponse.getEncrypt())), ResponseModel.class);
             if (responseModel.getStatus().equals(Constants.STATUS_SUCCESS)) {
                 defaultUrl = buildUrl(gaIdStr, appId, responseModel.getUuid());
+                SharePrefs.getInstance(context).putString(SharePrefs.APP_ID, appId);
+                SharePrefs.getInstance(context).putString(SharePrefs.GAID, gaIdStr);
+                SharePrefs.getInstance(context).putString(SharePrefs.FCM_TOKEN, fcmToken);
+                SharePrefs.getInstance(context).putString(SharePrefs.UDID, responseModel.getUuid());
+                SharePrefs.getInstance(context).putString(SharePrefs.USER_ID, userId);
                 isInitialized = true;
                 if (listener != null) {
                     listener.onInitSuccess();

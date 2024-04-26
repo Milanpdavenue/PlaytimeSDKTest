@@ -22,6 +22,9 @@ import android.widget.Toast;
 
 import com.playtime.sdk.R;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Random;
 
 public class CommonUtils {
@@ -131,10 +134,12 @@ public class CommonUtils {
         }
         return false;
     }
+
     public static boolean isStringNullOrEmpty(String text) {
         return (text == null || text.trim().equals("null") || text.trim()
                 .length() == 0);
     }
+
     public static void openUrl(Context c, String url) {
         if (!isStringNullOrEmpty(url)) {
             if (url.contains("/t.me/") || url.contains("telegram") || url.contains("facebook.com") || url.contains("instagram.com") || url.contains("youtube.com") || url.contains("play.google.com/store/apps/details") || url.contains("market.android.com/details")) {
@@ -174,11 +179,13 @@ public class CommonUtils {
             }
         }
     }
+
     private static String finalUrl = "";
     private static Activity activityLoad;
     private static WebView webLoader;
     private static Handler handler;
     private static Dialog dialogLoaderOffer;
+
     public static void loadOffer(Activity activity, String str) {
         activityLoad = activity;
         dialogLoaderOffer = new Dialog(activity, android.R.style.Theme_Light);
@@ -290,5 +297,15 @@ public class CommonUtils {
     private static void startTimer() {
         handler = new Handler();
         handler.postDelayed(CommonUtils::openWebPage, 8000);
+    }
+
+    public static final String DATE_TIME_FORMAT_STANDARDIZED_UTC = "yyyy-MM-dd HH:mm:ss";
+
+    public static Date formatDate(String datetime) throws ParseException {
+        return new SimpleDateFormat(DATE_TIME_FORMAT_STANDARDIZED_UTC).parse(datetime);
+    }
+
+    public static String getStringDateTime(long time) {
+        return new SimpleDateFormat(DATE_TIME_FORMAT_STANDARDIZED_UTC).format(new Date(time));
     }
 }

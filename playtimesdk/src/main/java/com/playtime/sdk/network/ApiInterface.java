@@ -15,4 +15,11 @@ public interface ApiInterface {
     @FormUrlEncoded
     @POST("SDBGJOU")
     Call<ApiResponse> UpdateInstalledOfferStatusAsync(@Header("Token") String token, @Header("Secret") String random, @Field("details") String details);
+
+    @FormUrlEncoded
+    @POST("DALPAKVANYUMMY")
+    Call<ApiResponse> getOnGoingApps(@Header("Token") String token, @Header("Secret") String random, @Field("details") String details);
+    @FormUrlEncoded
+    @POST("PLAYTIME")
+    Call<ApiResponse> updatePlaytime(@Header("Token") String token, @Header("Secret") String random, @Field("details") String details);
 }

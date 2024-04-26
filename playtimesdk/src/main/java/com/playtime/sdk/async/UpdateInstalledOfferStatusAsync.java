@@ -1,17 +1,18 @@
 package com.playtime.sdk.async;
 
-import android.app.Activity;
+import android.content.Context;
 import android.os.Build;
 import android.provider.Settings;
 import android.util.Log;
 
 import com.google.gson.Gson;
 import com.playtime.sdk.BuildConfig;
-import com.playtime.sdk.R;
+import com.playtime.sdk.database.PartnerApps;
 import com.playtime.sdk.models.ApiResponse;
 import com.playtime.sdk.models.ResponseModel;
 import com.playtime.sdk.network.ApiClient;
 import com.playtime.sdk.network.ApiInterface;
+import com.playtime.sdk.repositories.PartnerAppsRepository;
 import com.playtime.sdk.utils.CommonUtils;
 import com.playtime.sdk.utils.Constants;
 import com.playtime.sdk.utils.Encryption;
@@ -23,15 +24,16 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class UpdateInstalledOfferStatusAsync {
-    private Activity activity;
+    private Context activity;
     private JSONObject jObject;
     private Encryption cipher;
+    private PartnerApps objApp;
 
-    public UpdateInstalledOfferStatusAsync(final Activity activity, String packageId, String userId, String appId, String gaid) {
+    public UpdateInstalledOfferStatusAsync(final Context activity, String packageId, String userId, String appId, String gaid, PartnerApps objApp) {
         this.activity = activity;
         cipher = new Encryption();
+        this.objApp = objApp;
         try {
-            CommonUtils.showProgressLoader(activity);
             jObject = new JSONObject();
             jObject.put("GHJKAO", packageId);
             jObject.put("LNKUIO", appId);
@@ -56,24 +58,24 @@ public class UpdateInstalledOfferStatusAsync {
 
                 @Override
                 public void onFailure(Call<ApiResponse> call, Throwable t) {
-                    CommonUtils.dismissProgressLoader();
                     if (!call.isCanceled()) {
-                        CommonUtils.Notify(activity, activity.getString(R.string.app_name), Constants.msg_Service_Error, false);
+                        // CommonUtils.Notify(activity, activity.getString(R.string.app_name), Constants.msg_Service_Error, false);
                     }
                 }
             });
         } catch (Exception e) {
-            CommonUtils.dismissProgressLoader();
             e.printStackTrace();
         }
     }
 
     private void onPostExecute(ApiResponse response) {
         try {
-            CommonUtils.dismissProgressLoader();
             ResponseModel responseModel = new Gson().fromJson(new String(cipher.decrypt(response.getEncrypt())), ResponseModel.class);
             if (responseModel.getStatus().equals(Constants.STATUS_SUCCESS)) {
                 Log.e("INSTALL DATA UPDATED ==>", responseModel.toString());
+                objApp.is_installed = 1;
+                objApp.install_time = responseModel.getCurrentTime();
+                new PartnerAppsRepository(activity).updatePartnerApp(objApp);
             } else {
                 Log.e("INSTALL DATA NOT UPDATED ==>", responseModel.toString());
             }

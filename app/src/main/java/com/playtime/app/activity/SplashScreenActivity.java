@@ -1,8 +1,13 @@
 package com.playtime.app.activity;
 
+import android.app.Activity;
 import android.content.pm.ActivityInfo;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
+import android.webkit.WebSettings;
 import android.widget.ImageView;
 import android.widget.Toast;
 
@@ -10,6 +15,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.playtime.app.ApplicationController;
 import com.playtime.app.R;
+import com.playtime.app.utils.AppLogger;
 import com.playtime.sdk.PlaytimeSDK;
 
 public class SplashScreenActivity extends AppCompatActivity {
@@ -19,10 +25,45 @@ public class SplashScreenActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+        //setLightTheme(SplashScreenActivity.this);
         setContentView(R.layout.activity_splash_screen);
-
+        AppLogger.getInstance().e("SYSTEM USER AGENT", "===" + System.getProperty("http.agent"));
+        AppLogger.getInstance().e("WEBVIEW USER AGENT", "===" + WebSettings.getDefaultUserAgent(SplashScreenActivity.this));
         ApplicationController app = (ApplicationController) getApplication();
         app.initPlaytimeSDK();
+
+//        try {
+//            long currentTime = Calendar.getInstance().getTimeInMillis();
+//            Calendar endCal = Calendar.getInstance();
+//            endCal.setTime(CommonUtils.formatDate("2024-04-19 19:00:00"));
+//            long lastTime = endCal.getTimeInMillis();
+////
+//            UsageStatsManager mUsageStatsManager = (UsageStatsManager) getApplicationContext().getSystemService(Context.USAGE_STATS_SERVICE);
+////
+////            Map<String, UsageStats> aggregatedStatsMap = mUsageStatsManager.queryAndAggregateUsageStats(lastTime, currentTime);
+////            for (Map.Entry<String, UsageStats> entry : aggregatedStatsMap.entrySet()) {
+////                String key = entry.getKey();
+////                UsageStats value = entry.getValue();
+////                Log.e("MAP:", "PACKAGE: " + key.toString() + " USAGE: " + (value.getTotalTimeInForeground() / 1000) / 60);
+////            }
+////            Log.e("===============================:", "===============================:");
+//            final List<UsageStats> stats =
+//                    mUsageStatsManager.queryUsageStats(UsageStatsManager.INTERVAL_DAILY,
+//                            lastTime, currentTime);
+//            if (stats != null) {
+//                final int statCount = stats.size();
+//                for (int i = 0; i < statCount; i++) {
+//                    final android.app.usage.UsageStats pkgStats = stats.get(i);
+//                    if (pkgStats.getTotalTimeInForeground() > 0 && pkgStats.getLastTimeUsed() > endCal.getTimeInMillis()) {
+////                        Log.e("FOR LOOP:", "PACKAGE: " + pkgStats.getPackageName() + " USED ON: " + CommonUtils.getStringDateTime(pkgStats.getLastTimeUsed()));
+//                        Log.e("FOR LOOP:", "PACKAGE: " + pkgStats.getPackageName() + " USAGE: " + ((pkgStats.getTotalTimeInForeground() / 1000) / 60) + " USED ON: " + CommonUtils.getStringDateTime(pkgStats.getLastTimeUsed()));
+//                    }
+//                }
+//            }
+//        } catch (ParseException e) {
+//            e.printStackTrace();
+//        }
+
 
         ivOfferWall = findViewById(R.id.ivOfferWall);
         ivOfferWall.setOnClickListener(new View.OnClickListener() {
@@ -35,5 +76,15 @@ public class SplashScreenActivity extends AppCompatActivity {
                 }
             }
         });
+    }
+
+
+    public static void setLightTheme(Activity context) {
+        Window window = context.getWindow();
+        window.setNavigationBarColor(context.getColor(R.color.white));
+
+        window.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR | View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
+        window.setStatusBarColor(Color.parseColor("#F4F4F4"));
+        window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
     }
 }
