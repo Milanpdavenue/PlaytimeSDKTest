@@ -47,13 +47,11 @@ import com.playtime.sdk.database.PartnerApps;
 import com.playtime.sdk.repositories.PartnerAppsRepository;
 import com.playtime.sdk.utils.CommonUtils;
 import com.playtime.sdk.utils.Constants;
+import com.playtime.sdk.utils.SharePrefs;
 
 public class PlaytimeOfferWallActivity extends AppCompatActivity {
     private WebView webViewPage;
     private String urlPage;
-    private String appId;
-    private String userId;
-    private String gaId;
     private String applicationName;
     private Dialog dialog;
     private Drawable appIconBitmap;
@@ -72,9 +70,9 @@ public class PlaytimeOfferWallActivity extends AppCompatActivity {
         }
         setContentView(R.layout.activity_playtime_offerwall);
 
-        appId = getIntent().getStringExtra("appId");
-        userId = getIntent().getStringExtra("userId");
-        gaId = getIntent().getStringExtra("gaId");
+        registerPackageInstallBroadCast();
+        registerDeviceStatusBroadCast();
+
         applicationName = getIntent().getStringExtra("applicationName");
         urlPage = getIntent().getStringExtra("url");
         Log.e("PlaytimeOfferWallActivity URL===", urlPage);
@@ -161,8 +159,6 @@ public class PlaytimeOfferWallActivity extends AppCompatActivity {
                 return true;
             }
         });
-        registerPackageInstallBroadCast();
-        registerDeviceStatusBroadCast();
     }
 
     public class JSInterface {
@@ -180,12 +176,13 @@ public class PlaytimeOfferWallActivity extends AppCompatActivity {
                 requestUsageStatsPermission();
                 return;
             }
-            if (!CommonUtils.isStringNullOrEmpty(offerDetails) && shouldTrackUsage) {
+            if (!CommonUtils.isStringNullOrEmpty(offerDetails)) {
                 Log.e("INSERT OFFER: ", "INSERT OFFER: " + offerDetails);
                 PartnerApps objPartnerApp = new Gson().fromJson(offerDetails, PartnerApps.class);
                 new PartnerAppsRepository(PlaytimeOfferWallActivity.this).insert(objPartnerApp);
             }
             if (screenNo != null && screenNo.length() > 0) {
+                registerPackageInstallBroadCast();
                 switch (screenNo) {
                     case "1":
                         // Open url externally
@@ -356,33 +353,33 @@ public class PlaytimeOfferWallActivity extends AppCompatActivity {
 
     private void registerPackageInstallBroadCast() {
         try {
-            IntentFilter intentFilter = new IntentFilter();
-            intentFilter.addAction(Intent.ACTION_PACKAGE_ADDED);
-            intentFilter.addAction(Intent.ACTION_INSTALL_PACKAGE);
-            intentFilter.addCategory(Intent.CATEGORY_DEFAULT);
-            intentFilter.addDataScheme("package");
-
             if (PlaytimeSDK.packageInstallBroadcast == null) {
+                IntentFilter intentFilter = new IntentFilter();
+                intentFilter.addAction(Intent.ACTION_PACKAGE_ADDED);
+                intentFilter.addAction(Intent.ACTION_INSTALL_PACKAGE);
+                intentFilter.addCategory(Intent.CATEGORY_DEFAULT);
+                intentFilter.addDataScheme("package");
                 PlaytimeSDK.packageInstallBroadcast = new BroadcastReceiver() {
                     @Override
                     public void onReceive(Context context, Intent intent) {
+                        Log.e(" PlaytimeSDK.packageInstallBroadcast INSTALL", "onReceive===" + intent.getAction());
                         if (!intent.getExtras().containsKey(Intent.EXTRA_REPLACING)) {
                             try {
                                 // EDIT-check if it is a partner app
                                 Log.e("InstallPackageReceiver", "NAME: " + intent.getData().toString().replace("package:", ""));
-                                //new UpdateInstalledOfferStatusAsync(PlaytimeOfferWallActivity.this, intent.getData().toString().replace("package:", ""), userId, appId, gaId);
+                                new PartnerAppsRepository(PlaytimeOfferWallActivity.this).checkIsPartnerApp(intent.getData().toString().replace("package:", ""), SharePrefs.getInstance(PlaytimeOfferWallActivity.this).getString(SharePrefs.UDID), SharePrefs.getInstance(PlaytimeOfferWallActivity.this).getString(SharePrefs.APP_ID), SharePrefs.getInstance(PlaytimeOfferWallActivity.this).getString(SharePrefs.GAID));
                             } catch (Exception e) {
                                 e.printStackTrace();
                             }
                         }
                     }
                 };
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                     registerReceiver(PlaytimeSDK.packageInstallBroadcast, intentFilter, RECEIVER_EXPORTED);
                 } else {
                     registerReceiver(PlaytimeSDK.packageInstallBroadcast, intentFilter);
                 }
-                //AppLogger.getInstance().e("PACKAGE onCreate=======", "REGISTER");
+                Log.e("PackageInstallBroadCast onCreate=======", "REGISTER");
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -391,33 +388,28 @@ public class PlaytimeOfferWallActivity extends AppCompatActivity {
 
     private void registerDeviceStatusBroadCast() {
         try {
-            IntentFilter intentFilter = new IntentFilter();
-            intentFilter.addAction(Intent.ACTION_BOOT_COMPLETED);
-            intentFilter.addAction(Intent.ACTION_DREAMING_STARTED);
-            intentFilter.addCategory(Intent.ACTION_DREAMING_STOPPED);
-            intentFilter.addCategory(Intent.ACTION_USER_PRESENT);
-
             if (PlaytimeSDK.deviceStatusBroadcast == null) {
+                IntentFilter intentFilter = new IntentFilter();
+                intentFilter.addAction(Intent.ACTION_BOOT_COMPLETED);
+                intentFilter.addAction(Intent.ACTION_DREAMING_STARTED);
+                intentFilter.addAction(Intent.ACTION_DREAMING_STOPPED);
+                intentFilter.addAction(Intent.ACTION_USER_PRESENT);
                 PlaytimeSDK.deviceStatusBroadcast = new BroadcastReceiver() {
                     @Override
                     public void onReceive(Context context, Intent intent) {
-                        if (!intent.getExtras().containsKey(Intent.EXTRA_REPLACING)) {
-                            try {
-                                // EDIT-check if it is a partner app
-                                Log.e("InstallPackageReceiver", "NAME: " + intent.getData().toString().replace("package:", ""));
-                                new PartnerAppsRepository(PlaytimeOfferWallActivity.this).checkIsPartnerApp(intent.getData().toString().replace("package:", ""), userId, appId, gaId);
-                            } catch (Exception e) {
-                                e.printStackTrace();
-                            }
+                        try {
+                            Log.e("DeviceStatusBroadCast", "NAME: " + intent.getAction());
+                        } catch (Exception e) {
+                            e.printStackTrace();
                         }
                     }
                 };
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                     registerReceiver(PlaytimeSDK.deviceStatusBroadcast, intentFilter, RECEIVER_EXPORTED);
                 } else {
                     registerReceiver(PlaytimeSDK.deviceStatusBroadcast, intentFilter);
                 }
-                //AppLogger.getInstance().e("PACKAGE onCreate=======", "REGISTER");
+                Log.e("DeviceStatusBroadCast onCreate=======", "REGISTER");
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -429,12 +421,12 @@ public class PlaytimeOfferWallActivity extends AppCompatActivity {
             if (PlaytimeSDK.packageInstallBroadcast != null) {
                 unregisterReceiver(PlaytimeSDK.packageInstallBroadcast);
                 PlaytimeSDK.packageInstallBroadcast = null;
-                Log.e("PACKAGE onDestroy=======", "UNREGISTER");
+                Log.e("packageInstallBroadcast onDestroy=======", "UNREGISTER");
             }
             if (PlaytimeSDK.deviceStatusBroadcast != null) {
                 unregisterReceiver(PlaytimeSDK.deviceStatusBroadcast);
                 PlaytimeSDK.deviceStatusBroadcast = null;
-                Log.e("PACKAGE onDestroy=======", "UNREGISTER");
+                Log.e("DeviceStatusBroadCast onDestroy=======", "UNREGISTER");
             }
         } catch (Exception e) {
             PlaytimeSDK.packageInstallBroadcast = null;

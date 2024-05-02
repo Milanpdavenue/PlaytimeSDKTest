@@ -37,9 +37,8 @@ public class PartnerAppsRepository {
             if (mAsyncTaskDao.isPartnerAppExist(params[0].task_offer_id) == 0) {
                 params[0].is_installed = 0;
                 long result = mAsyncTaskDao.insert(params[0]);
-                if (result > 0 && params[0].data != null && params[0].data.size() > 0) {
-                    PartnerAppTargetsRepository targetsRepo = new PartnerAppTargetsRepository(context);
-                    targetsRepo.insertAll(params[0].data);
+                if (result > 0) {
+                    Log.e("OFFER DATA", "OFFER DATA INSERTED");
                 }
             }
             return null;
@@ -137,15 +136,15 @@ public class PartnerAppsRepository {
         }
     }
 
-    public void checkIsPartnerApp(String packageName, String userId, String appId, String gaId) {
-        new UpdateInstallTimeIfPackageExistInPartnerApp(mDataDao).execute(new String[]{packageName, userId, appId, gaId});
+    public void checkIsPartnerApp(String packageName, String udid, String appId, String gaId) {
+        new UpdateInstallTimeIfPackageExistInPartnerApp(mDataDao).execute(new String[]{packageName, udid, appId, gaId});
     }
 
     private static class UpdateInstallTimeIfPackageExistInPartnerApp extends AsyncTask<String, Void, Void> {
         private PartnerAppsDao mAsyncTaskDao;
         private String packageId;
         private String appId;
-        private String userId;
+        private String udid;
         private String gaid;
         private PartnerApps objApp;
 
@@ -157,11 +156,12 @@ public class PartnerAppsRepository {
         protected Void doInBackground(final String... params) {
             packageId = params[0];
             appId = params[1];
-            userId = params[2];
+            udid = params[2];
             gaid = params[3];
             objApp = mAsyncTaskDao.getPartnerAppByPackageId(params[0]);
-            if (objApp != null && !CommonUtils.isStringNullOrEmpty(objApp.package_id)) {
-                new UpdateInstalledOfferStatusAsync(context, packageId, appId, userId, gaid, objApp);
+            if (objApp != null && !CommonUtils.isStringNullOrEmpty(objApp.package_id) && objApp.package_id.equals(packageId)) {
+                Log.e("CHECK PARTNER APP ==>", "THIS IS PARTNER APP: " + packageId);
+                new UpdateInstalledOfferStatusAsync(context, packageId, appId, udid, gaid, objApp);
             }
             return null;
         }

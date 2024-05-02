@@ -20,6 +20,6 @@ public interface ApiInterface {
     @POST("DALPAKVANYUMMY")
     Call<ApiResponse> getOnGoingApps(@Header("Token") String token, @Header("Secret") String random, @Field("details") String details);
     @FormUrlEncoded
-    @POST("PLAYTIME")
+    @POST("UPDATEPLAYTIMEUSAGEPUDI")
     Call<ApiResponse> updatePlaytime(@Header("Token") String token, @Header("Secret") String random, @Field("details") String details);
 }

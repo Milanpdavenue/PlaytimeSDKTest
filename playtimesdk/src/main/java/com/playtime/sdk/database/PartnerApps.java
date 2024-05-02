@@ -43,11 +43,7 @@ public class PartnerApps implements Serializable {
     @Ignore
     public long usage_duration;
 
-    @Ignore
-    public ArrayList<PartnerAppTargets> data;
-
-
-    public PartnerApps(int task_offer_id, String task_offer_name, String package_id, int is_installed, String install_time, int conversion_id, String last_completion_time) {
+    public PartnerApps(int task_offer_id, String task_offer_name, String package_id, int is_installed, String install_time, int conversion_id, String last_completion_time, String offer_type_id, int is_completed) {
         this.task_offer_id = task_offer_id;
         this.task_offer_name = task_offer_name;
         this.package_id = package_id;
@@ -55,6 +51,8 @@ public class PartnerApps implements Serializable {
         this.install_time = install_time;
         this.conversion_id = conversion_id;
         this.last_completion_time = last_completion_time;
+        this.offer_type_id = offer_type_id;
+        this.is_completed = is_completed;
     }
 
     @Override
@@ -70,7 +68,6 @@ public class PartnerApps implements Serializable {
                 ", offer_type_id='" + offer_type_id + '\'' +
                 ", is_completed=" + is_completed +
                 ", usage_duration=" + usage_duration +
-                ", data=" + data +
                 '}';
     }
 }

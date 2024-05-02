@@ -8,12 +8,14 @@ import androidx.room.Insert;
 import androidx.room.Query;
 import androidx.room.Update;
 
+import com.playtime.sdk.utils.Constants;
+
 import java.util.List;
 
 @Dao
 public interface PartnerAppsDao {
-    @Query("SELECT * FROM PartnerApps WHERE is_completed = 0")
-    List<PartnerApps> getAll();
+    @Query("SELECT * FROM PartnerApps WHERE is_completed = 0 AND offer_type_id IN(" + Constants.OFFER_TYPE_DAY + "," + Constants.OFFER_TYPE_PLAYTIME + ")")
+    List<PartnerApps> getAllPlaytimeOffers();
 
     @Query("SELECT * FROM PartnerApps WHERE task_offer_id = :itemId")
     PartnerApps getPartnerAppsById(int itemId);

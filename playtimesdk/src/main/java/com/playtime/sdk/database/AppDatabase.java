@@ -6,7 +6,7 @@ import androidx.room.Database;
 import androidx.room.Room;
 import androidx.room.RoomDatabase;
 
-@Database(entities = {PartnerAppTargets.class, PartnerApps.class}, version = 1, exportSchema = false)
+@Database(entities = {PartnerApps.class}, version = 1, exportSchema = false)
 public abstract class AppDatabase extends RoomDatabase {
     private static AppDatabase appDB;
 
@@ -20,8 +20,5 @@ public abstract class AppDatabase extends RoomDatabase {
         }
         return appDB;
     }
-
-    public abstract PartnerAppTargetsDao partnerAppTargetsDao();
-
     public abstract PartnerAppsDao partnerAppsDao();
 }

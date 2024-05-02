@@ -35,8 +35,12 @@ public class AppTrackingSetup {
     }
 
     public static void stopTracking(Context context) {
-        WorkManager.getInstance(context).cancelAllWorkByTag(CHECK_USAGE_STATUS_WORKER);
-        WorkManager.getInstance(context).cancelAllWorkByTag(CHECK_DEVICE_STATUS_WORKER);
+        try {
+            WorkManager.getInstance(context).cancelAllWorkByTag(CHECK_USAGE_STATUS_WORKER);
+            WorkManager.getInstance(context).cancelAllWorkByTag(CHECK_DEVICE_STATUS_WORKER);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     private static void schedulePeriodicWork(Context context, String tag) {

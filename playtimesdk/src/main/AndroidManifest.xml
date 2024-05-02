@@ -6,40 +6,46 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission
         android:name="android.permission.PACKAGE_USAGE_STATS"
         tools:ignore="ProtectedPermissions" />
-    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
+    <queries>
+        <intent>
+            <action android:name="android.intent.action.MAIN" />
+        </intent>
+    </queries>
     <application>
         <activity
             android:name=".activity.PlaytimeOfferWallActivity"
             android:configChanges="uiMode|orientation"
             android:exported="false"
             android:screenOrientation="portrait" />
-        <service
-            android:name=".CheckUsageStatusService"
-            android:enabled="true"
-            android:exported="false"
-            android:permission="android.permission.BIND_JOB_SERVICE" />
 
-<!--        <receiver-->
-<!--            android:name=".DeviceStatusTracker"-->
-<!--            android:exported="true" >-->
-<!--            <intent-filter>-->
-<!--                <action android:name="android.intent.action.BOOT_COMPLETED" />-->
-<!--                <action android:name="android.intent.action.USER_PRESENT" />-->
-<!--            </intent-filter>-->
-<!--        </receiver>-->
+        <!--        <service-->
+        <!--            android:name=".CheckUsageStatusService"-->
+        <!--            android:enabled="true"-->
+        <!--            android:exported="false"-->
+        <!--            android:permission="android.permission.BIND_JOB_SERVICE" />-->
 
-        <receiver
-            android:name="PackageInstallReceiver"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.intent.action.PACKAGE_ADDED" />
-                <data android:scheme="package" />
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
-        </receiver>
+<!--                <receiver-->
+<!--                    android:name=".DeviceStatusTracker"-->
+<!--                    android:exported="true" >-->
+<!--                    <intent-filter>-->
+<!--                        <action android:name="android.intent.action.BOOT_COMPLETED" />-->
+<!--                        <action android:name="android.intent.action.USER_PRESENT" />-->
+<!--                    </intent-filter>-->
+<!--                </receiver>-->
+
+<!--                <receiver-->
+<!--                    android:name="PackageInstallReceiver"-->
+<!--                    android:exported="true">-->
+<!--                    <intent-filter>-->
+<!--                        <action android:name="android.intent.action.PACKAGE_ADDED" />-->
+<!--                        <data android:scheme="package" />-->
+<!--                        <category android:name="android.intent.category.DEFAULT" />-->
+<!--                    </intent-filter>-->
+<!--                </receiver>-->
     </application>
 </manifest>

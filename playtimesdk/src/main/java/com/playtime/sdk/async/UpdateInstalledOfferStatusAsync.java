@@ -6,6 +6,7 @@ import android.provider.Settings;
 import android.util.Log;
 
 import com.google.gson.Gson;
+import com.playtime.sdk.AppTrackingSetup;
 import com.playtime.sdk.BuildConfig;
 import com.playtime.sdk.database.PartnerApps;
 import com.playtime.sdk.models.ApiResponse;
@@ -75,7 +76,11 @@ public class UpdateInstalledOfferStatusAsync {
                 Log.e("INSTALL DATA UPDATED ==>", responseModel.toString());
                 objApp.is_installed = 1;
                 objApp.install_time = responseModel.getCurrentTime();
+                objApp.last_completion_time = responseModel.getCurrentTime();
                 new PartnerAppsRepository(activity).updatePartnerApp(objApp);
+                if (objApp.offer_type_id.equals(Constants.OFFER_TYPE_PLAYTIME) || objApp.offer_type_id.equals(Constants.OFFER_TYPE_DAY)) {
+                    AppTrackingSetup.startAppTracking(activity);
+                }
             } else {
                 Log.e("INSTALL DATA NOT UPDATED ==>", responseModel.toString());
             }
