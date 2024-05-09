@@ -7,7 +7,6 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.provider.Settings;
-import android.util.Log;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -48,6 +47,9 @@ public class SyncDataUtils {
             jObject.put("ERVTUH", SharePrefs.getInstance(context).getString(SharePrefs.USER_ID));
             jObject.put("POINTG", SharePrefs.getInstance(context).getString(SharePrefs.FCM_TOKEN));
             jObject.put("BGHNH5", Build.MODEL);
+            jObject.put("GGHN4D6", Build.BRAND);
+            jObject.put("TYNNH56", Build.MANUFACTURER);
+            jObject.put("VDHNH99", Build.DEVICE);
             jObject.put("CVBNHG", Build.VERSION.RELEASE);
             jObject.put("QAWSED", BuildConfig.VERSION_NAME);
             jObject.put("GHJKUF", Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID));
@@ -219,6 +221,9 @@ public class SyncDataUtils {
                     jObject.put("BGNHG", SharePrefs.getInstance(context).getString(SharePrefs.USER_ID));
                     jObject.put("POINTG", SharePrefs.getInstance(context).getString(SharePrefs.FCM_TOKEN));
                     jObject.put("BGHNH5", Build.MODEL);
+                    jObject.put("23DN4D6", Build.BRAND);
+                    jObject.put("TYNWER6", Build.MANUFACTURER);
+                    jObject.put("VDHNH", Build.DEVICE);
                     jObject.put("CVBNHG", Build.VERSION.RELEASE);
                     jObject.put("QAWSED", BuildConfig.VERSION_NAME);
                     jObject.put("HGJFUF", jsonArray);

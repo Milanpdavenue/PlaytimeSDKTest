@@ -1,13 +1,9 @@
 package com.playtime.app.activity;
 
 import android.app.Activity;
-import android.app.usage.UsageStats;
-import android.app.usage.UsageStatsManager;
-import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
@@ -21,10 +17,6 @@ import com.playtime.app.ApplicationController;
 import com.playtime.app.R;
 import com.playtime.app.utils.AppLogger;
 import com.playtime.sdk.PlaytimeSDK;
-import com.playtime.sdk.utils.CommonUtils;
-
-import java.util.Calendar;
-import java.util.List;
 
 public class SplashScreenActivity extends AppCompatActivity {
     private ImageView ivOfferWall;

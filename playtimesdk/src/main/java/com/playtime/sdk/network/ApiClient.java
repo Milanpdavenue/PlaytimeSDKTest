@@ -1,6 +1,8 @@
 package com.playtime.sdk.network;
 
 
+import com.playtime.sdk.PlaytimeSDK;
+
 import java.util.concurrent.TimeUnit;
 
 import okhttp3.OkHttpClient;
@@ -19,7 +21,7 @@ public class ApiClient {
             retrofit = new Retrofit.Builder()
                     .client(okHttpClient)
                     .addConverterFactory(GsonConverterFactory.create())
-                    .baseUrl("https://appcampaign.in/playtime_sdk/api100/")
+                    .baseUrl(PlaytimeSDK.getInstance().getBaseUrl())
                     .build();
         }
         return retrofit;

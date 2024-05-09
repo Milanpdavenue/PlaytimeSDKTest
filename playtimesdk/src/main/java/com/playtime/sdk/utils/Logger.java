@@ -11,6 +11,9 @@ public class Logger {
     private Logger() {
         isLogEnabled = BuildConfig.DEBUG;
     }
+//    private Logger() {
+//        isLogEnabled = true;
+//    }
 
     public static Logger getInstance() {
         return instance;

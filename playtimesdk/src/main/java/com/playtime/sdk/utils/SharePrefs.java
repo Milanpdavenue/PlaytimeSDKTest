@@ -3,6 +3,8 @@ package com.playtime.sdk.utils;
 import android.content.Context;
 import android.content.SharedPreferences;
 
+import com.playtime.sdk.PlaytimeSDK;
+
 public class SharePrefs {
     private static SharePrefs instance = null;
     private SharedPreferences pref;
@@ -12,6 +14,9 @@ public class SharePrefs {
     public static String UDID = "UUID";
     public static String FCM_TOKEN = "FCM_TOKEN";
     public static String IS_SYNC_IN_PROGRESS = "IS_SYNC_IN_PROGRESS";
+    public static String IS_CONSENT_GIVEN = "IS_CONSENT_GIVEN";
+    public static String CONSENT_TITLE = "CONSENT_TITLE";
+    public static String CONSENT_MESSAGE = "CONSENT_MESSAGE";
 
     public static SharePrefs getInstance(Context c) {
         if (instance != null) {
@@ -22,7 +27,7 @@ public class SharePrefs {
     }
 
     public SharePrefs(Context context) {
-        this.pref = context.getSharedPreferences("PlaytimeSDK", 0);
+        this.pref = context.getSharedPreferences(PlaytimeSDK.getInstance().getPName(), 0);
     }
 
     public void putString(String key, String val) {

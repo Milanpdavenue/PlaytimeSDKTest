@@ -43,6 +43,9 @@ public class UpdateInstalledOfferStatusAsync {
             jObject.put("KVHFYI", userId);
             jObject.put("NKOWEG", gaid);
             jObject.put("BGHNH56", Build.MODEL);
+            jObject.put("GGHNH56", Build.BRAND);
+            jObject.put("BGNNH56", Build.MANUFACTURER);
+            jObject.put("BGHNH99", Build.DEVICE);
             jObject.put("JKL54G", Build.VERSION.RELEASE);
             jObject.put("CVB23E", BuildConfig.VERSION_NAME);
             jObject.put("23ERF3", Settings.Secure.getString(activity.getContentResolver(), Settings.Secure.ANDROID_ID));

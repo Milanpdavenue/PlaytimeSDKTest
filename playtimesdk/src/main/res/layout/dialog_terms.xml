@@ -1,18 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:gravity="center"
-    android:layoutDirection="ltr"
-    android:orientation="vertical"
-    tools:ignore="MissingPrefix">
+    android:layout_gravity="center"
+    android:gravity="center">
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:layout_gravity="center"
-        android:layout_margin="@dimen/dim_20"
+        android:layout_marginStart="@dimen/dim_20"
+        android:layout_marginTop="@dimen/dim_100"
+        android:layout_marginEnd="@dimen/dim_20"
+        android:layout_marginBottom="@dimen/dim_100"
         android:background="@drawable/bg_round_rectangle_white"
         android:elevation="@dimen/dim_2"
         android:orientation="vertical">
@@ -21,26 +21,33 @@
             android:id="@+id/tvTitle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="@dimen/dim_15"
             android:gravity="center"
             android:includeFontPadding="false"
             android:text="Terms of Usage"
             android:textColor="#000"
             android:textSize="@dimen/textSize_22"
+            android:padding="@dimen/dim_20"
             android:textStyle="bold" />
 
-        <TextView
-            android:id="@+id/tvMessage"
+        <ScrollView
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="@dimen/dim_20"
-            android:layout_marginRight="@dimen/dim_20"
-            android:includeFontPadding="false"
-            android:lineSpacingExtra="@dimen/dim_1"
-            android:lineSpacingMultiplier="1.2"
-            android:text="To track this offer you need to give Usage Access Permission. Kindly go to settings screen and turn on toggle button to allow this permission."
-            android:textColor="@color/black"
-            android:textSize="@dimen/textSize_15" />
+            android:layout_height="0dp"
+            android:layout_weight="1">
+
+            <TextView
+                android:id="@+id/tvMessage"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:includeFontPadding="false"
+                android:lineSpacingExtra="@dimen/dim_1"
+                android:paddingLeft="@dimen/dim_20"
+                android:paddingRight="@dimen/dim_20"
+                android:paddingBottom="@dimen/dim_15"
+                android:lineSpacingMultiplier="1.2"
+                android:text="To track this offer you need to give Usage Access Permission. Kindly go to settings screen and turn on toggle button to allow this permission."
+                android:textColor="#737373"
+                android:textSize="@dimen/textSize_15" />
+        </ScrollView>
 
 
         <androidx.appcompat.widget.AppCompatButton
@@ -48,14 +55,14 @@
             android:layout_width="match_parent"
             android:layout_height="@dimen/dim_45"
             android:layout_marginStart="@dimen/dim_50"
-            android:layout_marginTop="@dimen/dim_20"
+            android:layout_marginTop="@dimen/dim_5"
             android:layout_marginEnd="@dimen/dim_50"
             android:layout_marginBottom="@dimen/dim_10"
             android:background="@drawable/bg_btn"
             android:elevation="@dimen/dim_2"
             android:gravity="center"
             android:includeFontPadding="false"
-            android:text="I want to earn rewards"
+            android:text="I Accept"
             android:textAllCaps="false"
             android:textColor="#FFFFFF"
             android:textSize="@dimen/textSize_15"
@@ -75,7 +82,7 @@
             android:includeFontPadding="false"
             android:paddingTop="@dimen/dim_12"
             android:paddingBottom="@dimen/dim_5"
-            android:text="Exit"
+            android:text="Reject"
             android:textAllCaps="false"
             android:textColor="#6277f4"
             android:textSize="@dimen/textSize_15"

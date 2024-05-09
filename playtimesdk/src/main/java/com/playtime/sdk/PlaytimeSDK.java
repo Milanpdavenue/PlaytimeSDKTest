@@ -10,7 +10,6 @@ import android.os.CountDownTimer;
 import android.os.Handler;
 import android.os.Looper;
 import android.provider.Settings;
-import android.util.Log;
 
 import androidx.annotation.Keep;
 import androidx.annotation.NonNull;
@@ -44,7 +43,7 @@ import retrofit2.Response;
 
 @Keep
 public class PlaytimeSDK {
-    private final String baseUrl = "https://appcampaign.in/playtime_sdk/web_view/index.php";
+    //    private final String baseUrl = "https://appcampaign.in/playtime_sdk/web_view/index.php";
     private String defaultUrl;
     private Boolean isInitialized = false;
     private String appId;
@@ -60,6 +59,20 @@ public class PlaytimeSDK {
 
     public PlaytimeSDK() {
     }
+
+    static {
+        System.loadLibrary("sdk");
+    }
+
+    public native String getBaseUrl();
+
+    public native String getUrl();
+
+    public native String getMIV();
+
+    public native String getKey();
+
+    public native String getPName();
 
     public static PlaytimeSDK getInstance() {
         if (instance == null) {
@@ -86,31 +99,34 @@ public class PlaytimeSDK {
 
     public void setTimer() {
         try {
-            new Handler(Looper.getMainLooper()).post(new Runnable() {
-                @Override
-                public void run() {
-                    if (timer == null) {
-                        timer = new CountDownTimer((30 * 60 * 1000L), (60 * 1000L)) {
-                            @Override
-                            public void onTick(long millisUntilFinished) {
-                                try {
-                                    Logger.getInstance().e(" START SYNC FROM TIMER ==>", "START SYNC FROM TIMER");
-                                    if (!SharePrefs.getInstance(context).getBoolean(SharePrefs.IS_SYNC_IN_PROGRESS)) {
-                                        new SyncDataUtils().syncData(context);
+            if (CommonUtils.isNetworkAvailable(context)) {
+                new Handler(Looper.getMainLooper()).post(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (timer == null) {
+                            timer = new CountDownTimer((30 * 60 * 1000L), (60 * 1000L)) {
+                                @Override
+                                public void onTick(long millisUntilFinished) {
+                                    try {
+                                        if (CommonUtils.isNetworkAvailable(context)) {
+                                            Logger.getInstance().e(" START SYNC FROM TIMER ==>", "START SYNC FROM TIMER");
+                                            if (!SharePrefs.getInstance(context).getBoolean(SharePrefs.IS_SYNC_IN_PROGRESS)) {
+                                                new SyncDataUtils().syncData(context);
+                                            }
+                                        }
+                                    } catch (Exception e) {
+                                        e.printStackTrace();
                                     }
-                                } catch (Exception e) {
-                                    e.printStackTrace();
                                 }
-                            }
 
-                            @Override
-                            public void onFinish() {
-                            }
-                        }.start();
+                                @Override
+                                public void onFinish() {
+                                }
+                            }.start();
+                        }
                     }
-                }
-            });
-
+                });
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -119,6 +135,10 @@ public class PlaytimeSDK {
     public void init(Context context, String appIdStr, String userIdStr, OfferWallInitListener listener) {
         if (listener != null && this.context != null) {
             listener.onAlreadyInitializing();
+            return;
+        }
+        if (listener != null && !CommonUtils.isNetworkAvailable(context)) {
+            listener.onInitFailed("No internet connection");
             return;
         }
         if (listener != null && (appIdStr == null || appIdStr.trim().isEmpty())) {
@@ -167,7 +187,7 @@ public class PlaytimeSDK {
     }
 
     private String buildUrl(String gaid, String appId, String uuId) {
-        StringBuilder urlBuilder = new StringBuilder(baseUrl);
+        StringBuilder urlBuilder = new StringBuilder(getUrl());
         urlBuilder.append("?");
         try {
             if (gaid != null) {
@@ -199,7 +219,7 @@ public class PlaytimeSDK {
             return urlBuilder.toString();
         } catch (UnsupportedEncodingException var7) {
             var7.printStackTrace();
-            return baseUrl;
+            return getUrl();
         }
     }
 
@@ -257,6 +277,9 @@ public class PlaytimeSDK {
             jObject.put("DF456DF", gaIdStr);
             jObject.put("QW23GB", fcmToken);
             jObject.put("GB45TGG", Build.MODEL);
+            jObject.put("212E4D6", Build.BRAND);
+            jObject.put("CDVFBG", Build.MANUFACTURER);
+            jObject.put("VDHNHQW", Build.DEVICE);
             jObject.put("BG6GH56", Build.VERSION.RELEASE);
             jObject.put("DF3DFG", BuildConfig.VERSION_NAME);
             jObject.put("DFG899", Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID));
@@ -291,6 +314,7 @@ public class PlaytimeSDK {
         try {
             Encryption cipher = new Encryption();
             ResponseModel responseModel = new Gson().fromJson(new String(cipher.decrypt(apiResponse.getEncrypt())), ResponseModel.class);
+//            Logger.getInstance().e("verifyAppId responseModel: ", "responseModel: " + responseModel);
             if (responseModel.getStatus().equals(Constants.STATUS_SUCCESS)) {
                 defaultUrl = buildUrl(gaIdStr, appId, responseModel.getUuid());
                 SharePrefs.getInstance(context).putString(SharePrefs.APP_ID, appId);
@@ -298,6 +322,8 @@ public class PlaytimeSDK {
                 SharePrefs.getInstance(context).putString(SharePrefs.FCM_TOKEN, fcmToken);
                 SharePrefs.getInstance(context).putString(SharePrefs.UDID, responseModel.getUuid());
                 SharePrefs.getInstance(context).putString(SharePrefs.USER_ID, userId);
+                SharePrefs.getInstance(context).putString(SharePrefs.CONSENT_TITLE, responseModel.getConsentTitle());
+                SharePrefs.getInstance(context).putString(SharePrefs.CONSENT_MESSAGE, responseModel.getConsentMessage());
                 isInitialized = true;
                 if (listener != null) {
                     listener.onInitSuccess();

@@ -17,12 +17,10 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.CountDownTimer;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.SystemClock;
 import android.provider.Settings;
-import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 import android.webkit.HttpAuthHandler;
@@ -41,17 +39,17 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatButton;
 import androidx.browser.customtabs.CustomTabsIntent;
 
-import com.google.gson.Gson;
 import com.playtime.sdk.AppTrackingSetup;
 import com.playtime.sdk.PlaytimeSDK;
 import com.playtime.sdk.R;
-import com.playtime.sdk.SyncDataUtils;
 import com.playtime.sdk.database.PartnerApps;
 import com.playtime.sdk.repositories.PartnerAppsRepository;
 import com.playtime.sdk.utils.CommonUtils;
 import com.playtime.sdk.utils.Constants;
 import com.playtime.sdk.utils.Logger;
 import com.playtime.sdk.utils.SharePrefs;
+
+import org.json.JSONObject;
 
 public class PlaytimeOfferWallActivity extends AppCompatActivity {
     private WebView webViewPage;
@@ -60,6 +58,7 @@ public class PlaytimeOfferWallActivity extends AppCompatActivity {
     private Dialog dialog;
     private Drawable appIconBitmap;
     private static long mLastClickTime = 0;
+    private boolean isFirstTime = true;
 
     public PlaytimeOfferWallActivity() {
     }
@@ -74,178 +73,254 @@ public class PlaytimeOfferWallActivity extends AppCompatActivity {
         }
         setContentView(R.layout.activity_playtime_offerwall);
 
-        registerPackageInstallBroadCast();
-        registerDeviceStatusBroadCast();
+        if (CommonUtils.isNetworkAvailable(PlaytimeOfferWallActivity.this)) {
+            registerPackageInstallBroadCast();
+            registerDeviceStatusBroadCast();
 
-        applicationName = getIntent().getStringExtra("applicationName");
-        urlPage = getIntent().getStringExtra("url");
-        Logger.getInstance().e("PlaytimeOfferWallActivity URL===", urlPage);
-        webViewPage = findViewById(R.id.webviewPage);
-        webViewPage.getSettings().setJavaScriptEnabled(true);
-        webViewPage.getSettings().setCacheMode(WebSettings.LOAD_CACHE_ELSE_NETWORK);
-        webViewPage.setWebViewClient(new WebViewClient());
-        webViewPage.setVerticalScrollBarEnabled(false);
-        webViewPage.setHorizontalScrollBarEnabled(false);
-        webViewPage.clearCache(true);
-        webViewPage.getSettings().setDomStorageEnabled(true);
-        webViewPage.getSettings().setLoadsImagesAutomatically(true);
-        webViewPage.getSettings().setMixedContentMode(0);
-        JSInterface jsInterface = new JSInterface();
-        webViewPage.addJavascriptInterface(jsInterface, "Android");
-        webViewPage.loadUrl(urlPage);
-        webViewPage.setWebViewClient(new WebViewClient() {
-            @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-            @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-            @Override
-            public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
+            applicationName = getIntent().getStringExtra("applicationName");
+            urlPage = getIntent().getStringExtra("url");
+            Logger.getInstance().e("PlaytimeOfferWallActivity URL===", urlPage);
+            webViewPage = findViewById(R.id.webviewPage);
+            webViewPage.getSettings().setJavaScriptEnabled(true);
+            webViewPage.getSettings().setCacheMode(WebSettings.LOAD_CACHE_ELSE_NETWORK);
+            webViewPage.setWebViewClient(new WebViewClient());
+            webViewPage.setVerticalScrollBarEnabled(false);
+            webViewPage.setHorizontalScrollBarEnabled(false);
+            webViewPage.clearCache(true);
+            webViewPage.getSettings().setDomStorageEnabled(true);
+            webViewPage.getSettings().setLoadsImagesAutomatically(true);
+            webViewPage.getSettings().setMixedContentMode(0);
+            JSInterface jsInterface = new JSInterface();
+            webViewPage.addJavascriptInterface(jsInterface, "Android");
+            webViewPage.loadUrl(urlPage);
+            webViewPage.setWebViewClient(new WebViewClient() {
+                @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+                @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+                @Override
+                public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
 //                    AppLogger.getInstance().d("shouldOverrideUrlLoading", "WEB RESOURCE URL : " + request.getUrl().toString());
-                return super.shouldOverrideUrlLoading(view, request);
-            }
+                    return super.shouldOverrideUrlLoading(view, request);
+                }
 
-            @Override
-            public void onReceivedHttpAuthRequest(WebView view, HttpAuthHandler handler, String host, String realm) {
-                super.onReceivedHttpAuthRequest(view, handler, host, realm);
-            }
+                @Override
+                public void onReceivedHttpAuthRequest(WebView view, HttpAuthHandler handler, String host, String realm) {
+                    super.onReceivedHttpAuthRequest(view, handler, host, realm);
+                }
 
-            @Override
-            public boolean shouldOverrideUrlLoading(WebView view, String url) {
+                @Override
+                public boolean shouldOverrideUrlLoading(WebView view, String url) {
 //                    AppLogger.getInstance().d("shouldOverrideUrlLoading", "URL : " + url);
-                try {
-                    if (url.startsWith("intent://")) {
-                        try {
-                            Intent intent = Intent.parseUri(url, Intent.URI_INTENT_SCHEME);
-                            if (intent.resolveActivity(getPackageManager()) != null) {
-                                startActivity(intent);
-                                return true;
+                    try {
+                        if (url.startsWith("intent://")) {
+                            try {
+                                Intent intent = Intent.parseUri(url, Intent.URI_INTENT_SCHEME);
+                                if (intent.resolveActivity(getPackageManager()) != null) {
+                                    startActivity(intent);
+                                    return true;
+                                }
+                                //try to find fallback url
+                                String fallbackUrl = intent.getStringExtra("browser_fallback_url");
+                                if (fallbackUrl != null) {
+                                    if (CommonUtils.isNetworkAvailable(PlaytimeOfferWallActivity.this)) {
+                                        webViewPage.loadUrl(fallbackUrl);
+                                    } else {
+                                        CommonUtils.setToast(PlaytimeOfferWallActivity.this, "No internet connection");
+                                    }
+                                    return true;
+                                }
+                                return CommonUtils.launchApp(PlaytimeOfferWallActivity.this, intent.getPackage());
+                            } catch (Exception e) {
+                                //not an intent uri
                             }
-                            //try to find fallback url
-                            String fallbackUrl = intent.getStringExtra("browser_fallback_url");
-                            if (fallbackUrl != null) {
-                                webViewPage.loadUrl(fallbackUrl);
-                                return true;
+                        } else if (url.startsWith("market://")) {
+                            try {
+                                //invite to install
+                                String packageName = url.substring("market://details?id=".length());
+                                if (packageName.contains("&")) {
+                                    packageName = packageName.substring(0, packageName.indexOf("&"));
+                                }
+                                return CommonUtils.launchApp(PlaytimeOfferWallActivity.this, packageName);
+                            } catch (Exception e) {
+                                //not an intent uri
                             }
-                            return CommonUtils.launchApp(PlaytimeOfferWallActivity.this, intent.getPackage());
-                        } catch (Exception e) {
-                            //not an intent uri
+                        } else {
+                            if (CommonUtils.isNetworkAvailable(PlaytimeOfferWallActivity.this)) {
+                                webViewPage.loadUrl(urlPage);
+                            } else {
+                                CommonUtils.setToast(PlaytimeOfferWallActivity.this, "No internet connection");
+                            }
                         }
-                    } else if (url.startsWith("market://")) {
-                        try {
-                            //invite to install
-                            String packageName = url.substring("market://details?id=".length());
-                            if (packageName.contains("&")) {
-                                packageName = packageName.substring(0, packageName.indexOf("&"));
-                            }
-                            return CommonUtils.launchApp(PlaytimeOfferWallActivity.this, packageName);
-                        } catch (Exception e) {
-                            //not an intent uri
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        if (CommonUtils.isNetworkAvailable(PlaytimeOfferWallActivity.this)) {
+                            webViewPage.loadUrl(urlPage);
+                        } else {
+                            CommonUtils.setToast(PlaytimeOfferWallActivity.this, "No internet connection");
                         }
-                    } else {
-                        webViewPage.loadUrl(urlPage);
                     }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    webViewPage.loadUrl(urlPage);
+                    return true;
                 }
-                return true;
-            }
 
-            @Override
-            public boolean onRenderProcessGone(WebView view, RenderProcessGoneDetail detail) {
-                try {
+                @Override
+                public boolean onRenderProcessGone(WebView view, RenderProcessGoneDetail detail) {
+                    try {
+                        if (CommonUtils.isNetworkAvailable(PlaytimeOfferWallActivity.this)) {
 //                  AppLogger.getInstance().e("onRenderProcessGone Main", "===========" + view.getUrl());
-                    if (webViewPage.canGoBack()) {
-                        //AppLogger.getInstance().e("BROWSER WINDOW : ", "page.canGoBack() : " + page.canGoBack());
-                        webViewPage.goBack();
+                            if (webViewPage.canGoBack()) {
+                                //AppLogger.getInstance().e("BROWSER WINDOW : ", "page.canGoBack() : " + page.canGoBack());
+                                webViewPage.goBack();
+                            }
+                        } else {
+                            CommonUtils.setToast(PlaytimeOfferWallActivity.this, "No internet connection");
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
                     }
-                } catch (Exception e) {
-                    e.printStackTrace();
+                    return true;
                 }
-                return true;
-            }
-        });
+
+                @Override
+                public void onPageFinished(WebView view, String url) {
+                    super.onPageFinished(view, url);
+                    if (isFirstTime) {
+                        if (!SharePrefs.getInstance(PlaytimeOfferWallActivity.this).getBoolean(SharePrefs.IS_CONSENT_GIVEN)) {
+                            final Handler handler = new Handler(Looper.getMainLooper());
+                            handler.postDelayed(new Runnable() {
+                                @Override
+                                public void run() {
+                                    CommonUtils.showConsentPopup(PlaytimeOfferWallActivity.this, SharePrefs.getInstance(PlaytimeOfferWallActivity.this).getString(SharePrefs.CONSENT_TITLE), SharePrefs.getInstance(PlaytimeOfferWallActivity.this).getString(SharePrefs.CONSENT_MESSAGE));
+                                }
+                            }, 3000);
+                        }
+                    }
+                    isFirstTime = false;
+                }
+            });
+        } else {
+            CommonUtils.setToast(PlaytimeOfferWallActivity.this, "No internet connection");
+//          CommonUtils.Notify(PlaytimeOfferWallActivity.this, "No Internet Connection", "It seems you are not connected to internet. Please turn on internet connection and try again.", true);
+        }
     }
 
     public class JSInterface {
         @JavascriptInterface
-        public void onOfferClicked(String offerId, String screenNo, String url, String offer_type, String offerDetails) {
-            CommonUtils.setToast(PlaytimeOfferWallActivity.this, "Offer Clicked ScreenNo: " + screenNo + "== Url: " + url);
-            Logger.getInstance().e("onOfferClicked: ", "onOfferClicked==screenNo: " + screenNo);
-            Logger.getInstance().e("onOfferClicked: ", "onOfferClicked==url: " + url);
-            if (SystemClock.elapsedRealtime() - mLastClickTime < 1000) {
-                return;
-            }
-            mLastClickTime = SystemClock.elapsedRealtime();
-            boolean shouldTrackUsage = offer_type.equals(Constants.OFFER_TYPE_PLAYTIME) || offer_type.equals(Constants.OFFER_TYPE_DAY);
-            if (!CommonUtils.isStringNullOrEmpty(offer_type) && shouldTrackUsage && !isUsageStatsPermissionGranted()) {
-                requestUsageStatsPermission();
-                return;
-            }
-            if (!CommonUtils.isStringNullOrEmpty(offerDetails)) {
-                Logger.getInstance().e("INSERT OFFER: ", "INSERT OFFER: " + offerDetails);
-                PartnerApps objPartnerApp = new Gson().fromJson(offerDetails, PartnerApps.class);
-                // check if install receiver is setup
-                new PartnerAppsRepository(PlaytimeOfferWallActivity.this).insert(objPartnerApp);
-                // check if usage tracking manager is setup
-                if (objPartnerApp.offer_type_id.equals(Constants.OFFER_TYPE_PLAYTIME) || objPartnerApp.offer_type_id.equals(Constants.OFFER_TYPE_DAY)) {
-                    AppTrackingSetup.startAppTracking(PlaytimeOfferWallActivity.this);
-                    PlaytimeSDK.getInstance().setTimer();
+        public void onOfferClicked(String offerId, String screenNo, String url, String offer_type, String offerDetails, String packageName) {
+            try {
+                if (CommonUtils.isNetworkAvailable(PlaytimeOfferWallActivity.this)) {
+//                CommonUtils.setToast(PlaytimeOfferWallActivity.this, "Offer Clicked ScreenNo: " + screenNo + "== Url: " + url);
+                    Logger.getInstance().e("onOfferClicked: ", "onOfferClicked==screenNo: " + screenNo);
+                    Logger.getInstance().e("onOfferClicked: ", "onOfferClicked==url: " + url);
+                    Logger.getInstance().e("onOfferClicked: ", "packageName==packageName: " + packageName);
+                    if (SystemClock.elapsedRealtime() - mLastClickTime < 1000) {
+                        return;
+                    }
+                    mLastClickTime = SystemClock.elapsedRealtime();
+                    Logger.getInstance().e("offer_type: ", "offer_type: " + offer_type);
+                    boolean shouldTrackUsage = offer_type.equals(Constants.OFFER_TYPE_PLAYTIME) || offer_type.equals(Constants.OFFER_TYPE_DAY);
+                    if (!CommonUtils.isStringNullOrEmpty(offer_type) && shouldTrackUsage && !isUsageStatsPermissionGranted()) {
+                        requestUsageStatsPermission();
+                        return;
+                    }
+                    if (!CommonUtils.isStringNullOrEmpty(offerDetails)) {
+                        JSONObject json = new JSONObject(offerDetails);
+                        Logger.getInstance().e("INSERT OFFER: ", "INSERT OFFER1: " + json);
+//                    PartnerApps objPartnerApp = new Gson().fromJson(offerDetails, PartnerApps.class);
+                        PartnerApps objPartnerApp = new PartnerApps(
+                                json.getInt("task_offer_id"),
+                                json.getString("task_offer_name"),
+                                json.getString("package_id"),
+                                json.getInt("is_installed"),
+                                json.getString("install_time"),
+                                json.getInt("conversion_id"),
+                                json.getString("last_completion_time"),
+                                json.getString("offer_type_id"),
+                                json.getInt("is_completed"));
+                        Logger.getInstance().e("INSERT OFFER: ", "INSERT OFFER2: " + objPartnerApp);
+                        // check if install receiver is setup
+                        new PartnerAppsRepository(PlaytimeOfferWallActivity.this).insert(objPartnerApp);
+                        // check if usage tracking manager is setup
+                        Logger.getInstance().e("objPartnerApp: ", "objPartnerApp: " + objPartnerApp);
+                        if (objPartnerApp.offer_type_id.equals(Constants.OFFER_TYPE_PLAYTIME) || objPartnerApp.offer_type_id.equals(Constants.OFFER_TYPE_DAY)) {
+                            AppTrackingSetup.startAppTracking(PlaytimeOfferWallActivity.this);
+                            PlaytimeSDK.getInstance().setTimer();
+                        }
+                    }
+                    if (screenNo != null && !screenNo.isEmpty()) {
+                        registerPackageInstallBroadCast();
+                        switch (screenNo) {
+                            case "1":
+                                // Open url externally
+                                runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        if (CommonUtils.isNetworkAvailable(PlaytimeOfferWallActivity.this)) {
+                                            CommonUtils.openUrl(PlaytimeOfferWallActivity.this, url);
+                                        } else {
+                                            CommonUtils.setToast(PlaytimeOfferWallActivity.this, "No internet connection");
+                                        }
+                                    }
+                                });
+                                break;
+                            case "2":
+                                // Open url in custom tab
+                                runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        try {
+                                            if (CommonUtils.isNetworkAvailable(PlaytimeOfferWallActivity.this)) {
+                                                Uri uri = Uri.parse(url);
+                                                new CustomTabsIntent.Builder()
+                                                        .build()
+                                                        .launchUrl(PlaytimeOfferWallActivity.this, uri);
+                                            } else {
+                                                CommonUtils.setToast(PlaytimeOfferWallActivity.this, "No internet connection");
+                                            }
+                                        } catch (Exception e) {
+                                            e.printStackTrace();
+                                        }
+                                    }
+                                });
+                                break;
+                            case "3":
+                                // load offer url in hidden browser and open play store
+                                runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        if (CommonUtils.isNetworkAvailable(PlaytimeOfferWallActivity.this)) {
+                                            if (url != null) {
+                                                CommonUtils.loadOffer(PlaytimeOfferWallActivity.this, url);
+                                            }
+                                        } else {
+                                            CommonUtils.setToast(PlaytimeOfferWallActivity.this, "No internet connection");
+                                        }
+                                    }
+                                });
+                                break;
+                            case "4":
+                                // Open url in current webview for task details
+                                runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        if (CommonUtils.isNetworkAvailable(PlaytimeOfferWallActivity.this)) {
+                                            String url1 = url + "&is_offer_installed=" + (CommonUtils.isPackageInstalled(PlaytimeOfferWallActivity.this, packageName) ? 1 : 0);
+                                            Logger.getInstance().e("URL", "URL: " + url1);
+                                            webViewPage.loadUrl(url1);
+                                        } else {
+                                            CommonUtils.setToast(PlaytimeOfferWallActivity.this, "No internet connection");
+                                        }
+                                    }
+                                });
+                                break;
+                            case "5": // open app if its already installed
+                                CommonUtils.openInstalledApp(PlaytimeOfferWallActivity.this, packageName);
+                                break;
+                        }
+                    }
+                } else {
+                    CommonUtils.setToast(PlaytimeOfferWallActivity.this, "No internet connection");
                 }
-            }
-            if (screenNo != null && !screenNo.isEmpty()) {
-                registerPackageInstallBroadCast();
-                switch (screenNo) {
-                    case "1":
-                        // Open url externally
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                CommonUtils.openUrl(PlaytimeOfferWallActivity.this, url);
-                            }
-                        });
-                        break;
-                    case "2":
-                        // Open url in custom tab
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                try {
-                                    Uri uri = Uri.parse(url);
-                                    new CustomTabsIntent.Builder()
-                                            .build()
-                                            .launchUrl(PlaytimeOfferWallActivity.this, uri);
-                                } catch (Exception e) {
-                                    e.printStackTrace();
-                                }
-                            }
-                        });
-                        break;
-                    case "3":
-                        // load offer url in hidden browser and open play store
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                if (url != null) {
-                                    CommonUtils.loadOffer(PlaytimeOfferWallActivity.this, url);
-                                }
-                            }
-                        });
-                        break;
-                    case "4":
-                        // Open url in current webview for task details
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                if (CommonUtils.isNetworkAvailable(PlaytimeOfferWallActivity.this)) {
-                                    webViewPage.loadUrl(url);
-                                } else {
-                                    CommonUtils.setToast(PlaytimeOfferWallActivity.this, "No internet connection");
-                                }
-                            }
-                        });
-                        break;
-                    case "5":
-                        break;
-                }
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         }
 
@@ -257,6 +332,11 @@ public class PlaytimeOfferWallActivity extends AppCompatActivity {
                     CommonUtils.setToast(PlaytimeOfferWallActivity.this, message);
                 }
             });
+        }
+
+        @JavascriptInterface
+        public int isAppInstalled(String packageName) {
+            return CommonUtils.isPackageInstalled(PlaytimeOfferWallActivity.this, packageName) ? 1 : 0;
         }
     }
 
@@ -338,7 +418,9 @@ public class PlaytimeOfferWallActivity extends AppCompatActivity {
     @Override
     public void onBackPressed() {
         try {
-            if (webViewPage.canGoBack()) {
+            if (webViewPage.canGoBack() && !CommonUtils.isNetworkAvailable(PlaytimeOfferWallActivity.this)) {
+                CommonUtils.setToast(PlaytimeOfferWallActivity.this, "No internet connection");
+            } else if (webViewPage.canGoBack()) {
                 //AppLogger.getInstance().e("BROWSER WINDOW : ", "page.canGoBack() : " + page.canGoBack());
                 webViewPage.goBack();
             } else {
@@ -396,6 +478,7 @@ public class PlaytimeOfferWallActivity extends AppCompatActivity {
             e.printStackTrace();
         }
     }
+
     private void registerDeviceStatusBroadCast() {
         try {
             if (PlaytimeSDK.deviceStatusBroadcast == null) {

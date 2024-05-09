@@ -25,9 +25,21 @@ public class ResponseModel {
     private String minDayUsage;
     @Expose
     private String minPlaytimeUsage;
+    @Expose
+    private String consentTitle;
+    @Expose
+    private String consentMessage;
 
     @Expose
     private ArrayList<PartnerApps> offers;
+
+    public String getConsentTitle() {
+        return consentTitle;
+    }
+
+    public String getConsentMessage() {
+        return consentMessage;
+    }
 
     public ArrayList<PartnerApps> getOffers() {
         return offers;
@@ -67,16 +79,6 @@ public class ResponseModel {
 
     @Override
     public String toString() {
-        return "ResponseModel{" +
-                "message='" + message + '\'' +
-                ", status='" + status + '\'' +
-                ", points='" + points + '\'' +
-                ", uuid='" + uuid + '\'' +
-                ", earningPoint='" + earningPoint + '\'' +
-                ", currentTime='" + currentTime + '\'' +
-                ", minDayUsage='" + minDayUsage + '\'' +
-                ", minPlaytimeUsage='" + minPlaytimeUsage + '\'' +
-                ", offers=" + offers +
-                '}';
+        return "ResponseModel{" + "message='" + message + '\'' + ", status='" + status + '\'' + ", points='" + points + '\'' + ", uuid='" + uuid + '\'' + ", earningPoint='" + earningPoint + '\'' + ", currentTime='" + currentTime + '\'' + ", minDayUsage='" + minDayUsage + '\'' + ", minPlaytimeUsage='" + minPlaytimeUsage + '\'' + ", offers=" + offers + '}';
     }
 }

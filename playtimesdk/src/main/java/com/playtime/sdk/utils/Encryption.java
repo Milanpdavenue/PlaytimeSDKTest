@@ -1,28 +1,28 @@
 package com.playtime.sdk.utils;
 
+import com.playtime.sdk.PlaytimeSDK;
+
 import java.security.NoSuchAlgorithmException;
+
 import javax.crypto.Cipher;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
 public class Encryption {
-    private String iv ="wegw6g4e68v468v4";//Dummy iv (CHANGE IT!)
+    private String iv = PlaytimeSDK.getInstance().getMIV();
     private IvParameterSpec ivspec;
     private SecretKeySpec keyspec;
     private Cipher cipher;
-    private String SecretKey = "rhheh165r6r6tgh7";//Dummy secretKey (CHANGE IT!)
+    private String SecretKey = PlaytimeSDK.getInstance().getKey();
 
     public Encryption() {
         ivspec = new IvParameterSpec(iv.getBytes());
-
         keyspec = new SecretKeySpec(SecretKey.getBytes(), "AES");
 
         try {
             cipher = Cipher.getInstance("AES/CBC/NoPadding");
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-        } catch (NoSuchPaddingException e) {
+        } catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
             e.printStackTrace();
         }
     }
@@ -40,7 +40,6 @@ public class Encryption {
             else
                 str = str + Integer.toHexString(data[i] & 0xFF);
         }
-//        M_Win_AppLogger.getInstance().d("STR", str);
         return str;
     }
 
@@ -112,7 +111,6 @@ public class Encryption {
         } catch (Exception e) {
             throw new Exception("[decrypt] " + e.getMessage());
         }
-//        M_Win_AppLogger.getInstance().e("DECRYPT==", "==" + new String(decrypted));
         return decrypted;
     }
 

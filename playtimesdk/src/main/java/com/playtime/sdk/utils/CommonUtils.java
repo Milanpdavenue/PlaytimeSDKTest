@@ -12,6 +12,8 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Handler;
+import android.text.Html;
+import android.text.method.LinkMovementMethod;
 import android.view.Gravity;
 import android.view.View;
 import android.view.Window;
@@ -23,6 +25,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.playtime.sdk.R;
+import com.playtime.sdk.activity.PlaytimeOfferWallActivity;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -91,7 +94,71 @@ public class CommonUtils {
         return i1;
     }
 
-    public static void Notify(final Context activity, String title, String message, boolean isFinish) {
+//    public static void Notify(final Context activity, String title, String message, boolean isFinish) {
+//        try {
+//            if (activity != null) {
+//                final Dialog dialog1 = new Dialog(activity, android.R.style.Theme_Light);
+//                dialog1.getWindow().setBackgroundDrawableResource(R.color.black_transparent);
+//                dialog1.requestWindowFeature(Window.FEATURE_NO_TITLE);
+//                dialog1.getWindow().addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+//                dialog1.setContentView(R.layout.popup_notify);
+//                dialog1.setCancelable(false);
+//
+//                Button btnOk = dialog1.findViewById(R.id.btnOk);
+//                TextView tvTitle = dialog1.findViewById(R.id.tvTitle);
+//                tvTitle.setText(title);
+//
+//                TextView tvMessage = dialog1.findViewById(R.id.tvMessage);
+//                tvMessage.setText(message);
+//                btnOk.setOnClickListener(v -> {
+//                    dialog1.dismiss();
+//                    if (isFinish && activity instanceof Activity && !((Activity) activity).isFinishing()) {
+//                        ((Activity) activity).finish();
+//                    }
+//                });
+//                dialog1.show();
+//            }
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+//    }
+
+    public static void showConsentPopup(final Context activity, String title, String message) {
+        try {
+            if (activity != null) {
+                final Dialog dialog1 = new Dialog(activity, android.R.style.Theme_Light);
+                dialog1.getWindow().setBackgroundDrawableResource(R.color.black_transparent);
+                dialog1.requestWindowFeature(Window.FEATURE_NO_TITLE);
+                dialog1.getWindow().addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+                dialog1.setContentView(R.layout.dialog_terms);
+                dialog1.setCancelable(false);
+
+                Button btnOk = dialog1.findViewById(R.id.btnOk);
+                Button btnCancel = dialog1.findViewById(R.id.btnCancel);
+
+                TextView tvTitle = dialog1.findViewById(R.id.tvTitle);
+                tvTitle.setText(title);
+
+                TextView tvMessage = dialog1.findViewById(R.id.tvMessage);
+                tvMessage.setText(Html.fromHtml(message));
+                tvMessage.setMovementMethod(LinkMovementMethod.getInstance());
+
+                btnOk.setOnClickListener(v -> {
+                    SharePrefs.getInstance(activity).putBoolean(SharePrefs.IS_CONSENT_GIVEN, true);
+                    dialog1.dismiss();
+                });
+                btnCancel.setOnClickListener(v -> {
+                    dialog1.dismiss();
+                    showExitConfirmationPopup(activity);
+                });
+                dialog1.show();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static void showExitConfirmationPopup(Context activity) {
         try {
             if (activity != null) {
                 final Dialog dialog1 = new Dialog(activity, android.R.style.Theme_Light);
@@ -102,14 +169,21 @@ public class CommonUtils {
                 dialog1.setCancelable(false);
 
                 Button btnOk = dialog1.findViewById(R.id.btnOk);
+                Button btnCancel = dialog1.findViewById(R.id.btnCancel);
+
                 TextView tvTitle = dialog1.findViewById(R.id.tvTitle);
-                tvTitle.setText(title);
+                tvTitle.setText("Hey, don't miss out");
 
                 TextView tvMessage = dialog1.findViewById(R.id.tvMessage);
-                tvMessage.setText(message);
+                tvMessage.setText("Do you really want to go back to App without collecting any rewards?");
+
                 btnOk.setOnClickListener(v -> {
                     dialog1.dismiss();
-                    if (isFinish && activity instanceof Activity && !((Activity) activity).isFinishing()) {
+                    CommonUtils.showConsentPopup(activity, SharePrefs.getInstance(activity).getString(SharePrefs.CONSENT_TITLE), SharePrefs.getInstance(activity).getString(SharePrefs.CONSENT_MESSAGE));
+                });
+                btnCancel.setOnClickListener(v -> {
+                    dialog1.dismiss();
+                    if (activity instanceof Activity && !((Activity) activity).isFinishing()) {
                         ((Activity) activity).finish();
                     }
                 });
@@ -303,9 +377,11 @@ public class CommonUtils {
 
     public static final String DATE_TIME_FORMAT_STANDARDIZED_UTC = "yyyy-MM-dd HH:mm:ss";
     public static final String DATE_FORMAT_STANDARDIZED_UTC = "yyyy-MM-dd";
+
     public static Date formatDate(String datetime) throws ParseException {
         return new SimpleDateFormat(DATE_TIME_FORMAT_STANDARDIZED_UTC).parse(datetime);
     }
+
     public static Date formatOnlyDate(String datetime) throws ParseException {
         return new SimpleDateFormat(DATE_FORMAT_STANDARDIZED_UTC).parse(datetime);
     }
@@ -313,6 +389,7 @@ public class CommonUtils {
     public static String getStringDate(long time) {
         return new SimpleDateFormat(DATE_FORMAT_STANDARDIZED_UTC).format(new Date(time));
     }
+
     public static String getStringDateTime(long time) {
         return new SimpleDateFormat(DATE_TIME_FORMAT_STANDARDIZED_UTC).format(new Date(time));
     }
@@ -325,5 +402,19 @@ public class CommonUtils {
             return false;
         }
         return true;
+    }
+
+    public static void openInstalledApp(Context context, String packageName) {
+        try {
+            Intent intent = context.getPackageManager().getLaunchIntentForPackage(packageName);
+
+            if (intent == null) {
+                intent = new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + packageName));
+            }
+            context.startActivity(intent);
+        } catch (Exception e) {
+            e.printStackTrace();
+            setToast(context, "Application not found");
+        }
     }
 }
