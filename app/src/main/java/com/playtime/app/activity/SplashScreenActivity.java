@@ -1,9 +1,13 @@
 package com.playtime.app.activity;
 
 import android.app.Activity;
+import android.app.usage.UsageStats;
+import android.app.usage.UsageStatsManager;
+import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
@@ -17,9 +21,14 @@ import com.playtime.app.ApplicationController;
 import com.playtime.app.R;
 import com.playtime.app.utils.AppLogger;
 import com.playtime.sdk.PlaytimeSDK;
+import com.playtime.sdk.utils.CommonUtils;
+
+import java.util.Calendar;
+import java.util.List;
 
 public class SplashScreenActivity extends AppCompatActivity {
     private ImageView ivOfferWall;
+    private ApplicationController app;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,13 +38,13 @@ public class SplashScreenActivity extends AppCompatActivity {
         setContentView(R.layout.activity_splash_screen);
         AppLogger.getInstance().e("SYSTEM USER AGENT", "===" + System.getProperty("http.agent"));
         AppLogger.getInstance().e("WEBVIEW USER AGENT", "===" + WebSettings.getDefaultUserAgent(SplashScreenActivity.this));
-        ApplicationController app = (ApplicationController) getApplication();
+        app = (ApplicationController) getApplication();
         app.initPlaytimeSDK();
 
 //        try {
 //            long currentTime = Calendar.getInstance().getTimeInMillis();
 //            Calendar endCal = Calendar.getInstance();
-//            endCal.setTime(CommonUtils.formatDate("2024-04-19 19:00:00"));
+//            endCal.setTime(CommonUtils.formatDate("2024-05-08 00:00:01"));
 //            long lastTime = endCal.getTimeInMillis();
 ////
 //            UsageStatsManager mUsageStatsManager = (UsageStatsManager) getApplicationContext().getSystemService(Context.USAGE_STATS_SERVICE);
@@ -54,13 +63,14 @@ public class SplashScreenActivity extends AppCompatActivity {
 //                final int statCount = stats.size();
 //                for (int i = 0; i < statCount; i++) {
 //                    final android.app.usage.UsageStats pkgStats = stats.get(i);
+//                    Log.e("FOR LOOP:", "PACKAGE: " + pkgStats.getPackageName() + " USAGE: " + pkgStats.getTotalTimeInForeground() + "=== USED ON: " + CommonUtils.getStringDateTime(pkgStats.getLastTimeUsed()));
 //                    if (pkgStats.getTotalTimeInForeground() > 0 && pkgStats.getLastTimeUsed() > endCal.getTimeInMillis()) {
 ////                        Log.e("FOR LOOP:", "PACKAGE: " + pkgStats.getPackageName() + " USED ON: " + CommonUtils.getStringDateTime(pkgStats.getLastTimeUsed()));
-//                        Log.e("FOR LOOP:", "PACKAGE: " + pkgStats.getPackageName() + " USAGE: " + ((pkgStats.getTotalTimeInForeground() / 1000) / 60) + " USED ON: " + CommonUtils.getStringDateTime(pkgStats.getLastTimeUsed()));
+////                        Log.e("FOR LOOP:", "PACKAGE: " + pkgStats.getPackageName() + " USAGE: " + ((pkgStats.getTotalTimeInForeground() / 1000) / 60) + " USED ON: " + CommonUtils.getStringDateTime(pkgStats.getLastTimeUsed()));
 //                    }
 //                }
 //            }
-//        } catch (ParseException e) {
+//        } catch (Exception e) {
 //            e.printStackTrace();
 //        }
 
@@ -86,5 +96,13 @@ public class SplashScreenActivity extends AppCompatActivity {
         window.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR | View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
         window.setStatusBarColor(Color.parseColor("#F4F4F4"));
         window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if (isFinishing()) {
+            app.destroy();
+        }
     }
 }

@@ -17,6 +17,7 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.SystemClock;
@@ -41,12 +42,15 @@ import androidx.appcompat.widget.AppCompatButton;
 import androidx.browser.customtabs.CustomTabsIntent;
 
 import com.google.gson.Gson;
+import com.playtime.sdk.AppTrackingSetup;
 import com.playtime.sdk.PlaytimeSDK;
 import com.playtime.sdk.R;
+import com.playtime.sdk.SyncDataUtils;
 import com.playtime.sdk.database.PartnerApps;
 import com.playtime.sdk.repositories.PartnerAppsRepository;
 import com.playtime.sdk.utils.CommonUtils;
 import com.playtime.sdk.utils.Constants;
+import com.playtime.sdk.utils.Logger;
 import com.playtime.sdk.utils.SharePrefs;
 
 public class PlaytimeOfferWallActivity extends AppCompatActivity {
@@ -75,7 +79,7 @@ public class PlaytimeOfferWallActivity extends AppCompatActivity {
 
         applicationName = getIntent().getStringExtra("applicationName");
         urlPage = getIntent().getStringExtra("url");
-        Log.e("PlaytimeOfferWallActivity URL===", urlPage);
+        Logger.getInstance().e("PlaytimeOfferWallActivity URL===", urlPage);
         webViewPage = findViewById(R.id.webviewPage);
         webViewPage.getSettings().setJavaScriptEnabled(true);
         webViewPage.getSettings().setCacheMode(WebSettings.LOAD_CACHE_ELSE_NETWORK);
@@ -165,8 +169,8 @@ public class PlaytimeOfferWallActivity extends AppCompatActivity {
         @JavascriptInterface
         public void onOfferClicked(String offerId, String screenNo, String url, String offer_type, String offerDetails) {
             CommonUtils.setToast(PlaytimeOfferWallActivity.this, "Offer Clicked ScreenNo: " + screenNo + "== Url: " + url);
-            Log.e("onOfferClicked: ", "onOfferClicked==screenNo: " + screenNo);
-            Log.e("onOfferClicked: ", "onOfferClicked==url: " + url);
+            Logger.getInstance().e("onOfferClicked: ", "onOfferClicked==screenNo: " + screenNo);
+            Logger.getInstance().e("onOfferClicked: ", "onOfferClicked==url: " + url);
             if (SystemClock.elapsedRealtime() - mLastClickTime < 1000) {
                 return;
             }
@@ -177,11 +181,17 @@ public class PlaytimeOfferWallActivity extends AppCompatActivity {
                 return;
             }
             if (!CommonUtils.isStringNullOrEmpty(offerDetails)) {
-                Log.e("INSERT OFFER: ", "INSERT OFFER: " + offerDetails);
+                Logger.getInstance().e("INSERT OFFER: ", "INSERT OFFER: " + offerDetails);
                 PartnerApps objPartnerApp = new Gson().fromJson(offerDetails, PartnerApps.class);
+                // check if install receiver is setup
                 new PartnerAppsRepository(PlaytimeOfferWallActivity.this).insert(objPartnerApp);
+                // check if usage tracking manager is setup
+                if (objPartnerApp.offer_type_id.equals(Constants.OFFER_TYPE_PLAYTIME) || objPartnerApp.offer_type_id.equals(Constants.OFFER_TYPE_DAY)) {
+                    AppTrackingSetup.startAppTracking(PlaytimeOfferWallActivity.this);
+                    PlaytimeSDK.getInstance().setTimer();
+                }
             }
-            if (screenNo != null && screenNo.length() > 0) {
+            if (screenNo != null && !screenNo.isEmpty()) {
                 registerPackageInstallBroadCast();
                 switch (screenNo) {
                     case "1":
@@ -362,12 +372,13 @@ public class PlaytimeOfferWallActivity extends AppCompatActivity {
                 PlaytimeSDK.packageInstallBroadcast = new BroadcastReceiver() {
                     @Override
                     public void onReceive(Context context, Intent intent) {
-                        Log.e(" PlaytimeSDK.packageInstallBroadcast INSTALL", "onReceive===" + intent.getAction());
+                        Logger.getInstance().e(" PlaytimeSDK.packageInstallBroadcast INSTALL", "onReceive===" + intent.getAction());
                         if (!intent.getExtras().containsKey(Intent.EXTRA_REPLACING)) {
                             try {
                                 // EDIT-check if it is a partner app
-                                Log.e("InstallPackageReceiver", "NAME: " + intent.getData().toString().replace("package:", ""));
+                                Logger.getInstance().e("InstallPackageReceiver", "NAME: " + intent.getData().toString().replace("package:", ""));
                                 new PartnerAppsRepository(PlaytimeOfferWallActivity.this).checkIsPartnerApp(intent.getData().toString().replace("package:", ""), SharePrefs.getInstance(PlaytimeOfferWallActivity.this).getString(SharePrefs.UDID), SharePrefs.getInstance(PlaytimeOfferWallActivity.this).getString(SharePrefs.APP_ID), SharePrefs.getInstance(PlaytimeOfferWallActivity.this).getString(SharePrefs.GAID));
+
                             } catch (Exception e) {
                                 e.printStackTrace();
                             }
@@ -379,13 +390,12 @@ public class PlaytimeOfferWallActivity extends AppCompatActivity {
                 } else {
                     registerReceiver(PlaytimeSDK.packageInstallBroadcast, intentFilter);
                 }
-                Log.e("PackageInstallBroadCast onCreate=======", "REGISTER");
+                Logger.getInstance().e("PackageInstallBroadCast onCreate=======", "REGISTER");
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
-
     private void registerDeviceStatusBroadCast() {
         try {
             if (PlaytimeSDK.deviceStatusBroadcast == null) {
@@ -398,7 +408,7 @@ public class PlaytimeOfferWallActivity extends AppCompatActivity {
                     @Override
                     public void onReceive(Context context, Intent intent) {
                         try {
-                            Log.e("DeviceStatusBroadCast", "NAME: " + intent.getAction());
+                            Logger.getInstance().e("DeviceStatusBroadCast", "NAME: " + intent.getAction());
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
@@ -409,7 +419,7 @@ public class PlaytimeOfferWallActivity extends AppCompatActivity {
                 } else {
                     registerReceiver(PlaytimeSDK.deviceStatusBroadcast, intentFilter);
                 }
-                Log.e("DeviceStatusBroadCast onCreate=======", "REGISTER");
+                Logger.getInstance().e("DeviceStatusBroadCast onCreate=======", "REGISTER");
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -421,12 +431,12 @@ public class PlaytimeOfferWallActivity extends AppCompatActivity {
             if (PlaytimeSDK.packageInstallBroadcast != null) {
                 unregisterReceiver(PlaytimeSDK.packageInstallBroadcast);
                 PlaytimeSDK.packageInstallBroadcast = null;
-                Log.e("packageInstallBroadcast onDestroy=======", "UNREGISTER");
+                Logger.getInstance().e("packageInstallBroadcast onDestroy=======", "UNREGISTER");
             }
             if (PlaytimeSDK.deviceStatusBroadcast != null) {
                 unregisterReceiver(PlaytimeSDK.deviceStatusBroadcast);
                 PlaytimeSDK.deviceStatusBroadcast = null;
-                Log.e("DeviceStatusBroadCast onDestroy=======", "UNREGISTER");
+                Logger.getInstance().e("DeviceStatusBroadCast onDestroy=======", "UNREGISTER");
             }
         } catch (Exception e) {
             PlaytimeSDK.packageInstallBroadcast = null;

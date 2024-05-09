@@ -8,5 +8,4 @@ public class Constants {
     public static String STATUS_SUCCESS = "1";
 
     public static String CHECK_USAGE_STATUS_WORKER = "CHECK_USAGE_STATUS_WORKER";
-    public static String CHECK_DEVICE_STATUS_WORKER = "CHECK_DEVICE_STATUS_WORKER";
 }

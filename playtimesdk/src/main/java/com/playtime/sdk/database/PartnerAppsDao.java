@@ -32,7 +32,7 @@ public interface PartnerAppsDao {
     @Insert(onConflict = REPLACE)
     void insertAll(List<PartnerApps> partnerAppsList);
 
-    @Insert
+    @Insert(onConflict = REPLACE)
     long insert(PartnerApps partnerApps);
 
     @Delete
@@ -44,6 +44,9 @@ public interface PartnerAppsDao {
     //Delete one item by id
     @Query("DELETE FROM PartnerApps WHERE task_offer_id = :itemId")
     void deleteById(int itemId);
+
+    @Query("DELETE FROM PartnerApps WHERE is_installed = 1")
+    void deleteOnlyInstalledOffers();
 
     //Delete multiple item NOT IN api data
     @Query("DELETE FROM PartnerApps WHERE task_offer_id NOT IN (:itemId)")

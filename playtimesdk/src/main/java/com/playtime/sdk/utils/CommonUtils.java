@@ -5,6 +5,8 @@ import android.app.Dialog;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -300,12 +302,28 @@ public class CommonUtils {
     }
 
     public static final String DATE_TIME_FORMAT_STANDARDIZED_UTC = "yyyy-MM-dd HH:mm:ss";
-
+    public static final String DATE_FORMAT_STANDARDIZED_UTC = "yyyy-MM-dd";
     public static Date formatDate(String datetime) throws ParseException {
         return new SimpleDateFormat(DATE_TIME_FORMAT_STANDARDIZED_UTC).parse(datetime);
     }
+    public static Date formatOnlyDate(String datetime) throws ParseException {
+        return new SimpleDateFormat(DATE_FORMAT_STANDARDIZED_UTC).parse(datetime);
+    }
 
+    public static String getStringDate(long time) {
+        return new SimpleDateFormat(DATE_FORMAT_STANDARDIZED_UTC).format(new Date(time));
+    }
     public static String getStringDateTime(long time) {
         return new SimpleDateFormat(DATE_TIME_FORMAT_STANDARDIZED_UTC).format(new Date(time));
+    }
+
+    public static boolean isPackageInstalled(Context c, String targetPackage) {
+        PackageManager pm = c.getPackageManager();
+        try {
+            PackageInfo info = pm.getPackageInfo(targetPackage, PackageManager.GET_META_DATA);
+        } catch (PackageManager.NameNotFoundException e) {
+            return false;
+        }
+        return true;
     }
 }

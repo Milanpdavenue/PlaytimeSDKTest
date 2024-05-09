@@ -18,34 +18,10 @@
     </queries>
     <application>
         <activity
+            android:theme="@style/ActivityTheme"
             android:name=".activity.PlaytimeOfferWallActivity"
             android:configChanges="uiMode|orientation"
             android:exported="false"
             android:screenOrientation="portrait" />
-
-        <!--        <service-->
-        <!--            android:name=".CheckUsageStatusService"-->
-        <!--            android:enabled="true"-->
-        <!--            android:exported="false"-->
-        <!--            android:permission="android.permission.BIND_JOB_SERVICE" />-->
-
-<!--                <receiver-->
-<!--                    android:name=".DeviceStatusTracker"-->
-<!--                    android:exported="true" >-->
-<!--                    <intent-filter>-->
-<!--                        <action android:name="android.intent.action.BOOT_COMPLETED" />-->
-<!--                        <action android:name="android.intent.action.USER_PRESENT" />-->
-<!--                    </intent-filter>-->
-<!--                </receiver>-->
-
-<!--                <receiver-->
-<!--                    android:name="PackageInstallReceiver"-->
-<!--                    android:exported="true">-->
-<!--                    <intent-filter>-->
-<!--                        <action android:name="android.intent.action.PACKAGE_ADDED" />-->
-<!--                        <data android:scheme="package" />-->
-<!--                        <category android:name="android.intent.category.DEFAULT" />-->
-<!--                    </intent-filter>-->
-<!--                </receiver>-->
     </application>
 </manifest>

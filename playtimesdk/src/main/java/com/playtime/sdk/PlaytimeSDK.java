@@ -1,10 +1,14 @@
 package com.playtime.sdk;
 
+import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Build;
+import android.os.CountDownTimer;
+import android.os.Handler;
+import android.os.Looper;
 import android.provider.Settings;
 import android.util.Log;
 
@@ -17,6 +21,7 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.gson.Gson;
 import com.playtime.sdk.activity.PlaytimeOfferWallActivity;
+import com.playtime.sdk.database.AppDatabase;
 import com.playtime.sdk.listeners.OfferWallInitListener;
 import com.playtime.sdk.models.ApiResponse;
 import com.playtime.sdk.models.ResponseModel;
@@ -25,6 +30,7 @@ import com.playtime.sdk.network.ApiInterface;
 import com.playtime.sdk.utils.CommonUtils;
 import com.playtime.sdk.utils.Constants;
 import com.playtime.sdk.utils.Encryption;
+import com.playtime.sdk.utils.Logger;
 import com.playtime.sdk.utils.SharePrefs;
 
 import org.json.JSONObject;
@@ -50,6 +56,7 @@ public class PlaytimeSDK {
     private static PlaytimeSDK instance;
     public static BroadcastReceiver packageInstallBroadcast;
     public static BroadcastReceiver deviceStatusBroadcast;
+    private CountDownTimer timer;
 
     public PlaytimeSDK() {
     }
@@ -66,7 +73,47 @@ public class PlaytimeSDK {
     }
 
     public void destroy() {
+        stopTimer();
         instance = null;
+    }
+
+    public void stopTimer() {
+        if (timer != null) {
+            timer.cancel();
+            timer = null;
+        }
+    }
+
+    public void setTimer() {
+        try {
+            new Handler(Looper.getMainLooper()).post(new Runnable() {
+                @Override
+                public void run() {
+                    if (timer == null) {
+                        timer = new CountDownTimer((30 * 60 * 1000L), (60 * 1000L)) {
+                            @Override
+                            public void onTick(long millisUntilFinished) {
+                                try {
+                                    Logger.getInstance().e(" START SYNC FROM TIMER ==>", "START SYNC FROM TIMER");
+                                    if (!SharePrefs.getInstance(context).getBoolean(SharePrefs.IS_SYNC_IN_PROGRESS)) {
+                                        new SyncDataUtils().syncData(context);
+                                    }
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
+                            }
+
+                            @Override
+                            public void onFinish() {
+                            }
+                        }.start();
+                    }
+                }
+            });
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public void init(Context context, String appIdStr, String userIdStr, OfferWallInitListener listener) {
@@ -74,11 +121,11 @@ public class PlaytimeSDK {
             listener.onAlreadyInitializing();
             return;
         }
-        if (listener != null && (appIdStr == null || appIdStr.trim().length() == 0)) {
+        if (listener != null && (appIdStr == null || appIdStr.trim().isEmpty())) {
             listener.onInitFailed("Set proper application id");
             return;
         }
-        if (listener != null && (userIdStr == null || userIdStr.trim().length() == 0)) {
+        if (listener != null && (userIdStr == null || userIdStr.trim().isEmpty())) {
             listener.onInitFailed("Set proper user id");
             return;
         }
@@ -91,7 +138,6 @@ public class PlaytimeSDK {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        AppTrackingSetup.startAppTracking(context);
     }
 
     public boolean isInitialized() {
@@ -111,6 +157,9 @@ public class PlaytimeSDK {
                 intent.putExtra("userId", this.uuId);
                 intent.putExtra("gaId", this.gaIdStr);
                 context.startActivity(intent);
+                if (context instanceof Activity) {
+                    ((Activity) context).overridePendingTransition(R.anim.fadein, R.anim.fadeout);
+                }
             }
         } else {
             CommonUtils.setToast(context, "No internet connection");
@@ -163,6 +212,16 @@ public class PlaytimeSDK {
 
         protected String doInBackground(Void... voids) {
             try {
+                try {
+                    if (!AppDatabase.getInstance(context).partnerAppsDao().getAllPlaytimeOffers().isEmpty()) {
+                        AppTrackingSetup.startAppTracking(context);
+                        setTimer();
+                    } else {
+                        AppTrackingSetup.stopTracking(context);
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
                 FirebaseMessaging.getInstance().getToken()
                         .addOnCompleteListener(new OnCompleteListener<String>() {
                             @Override
@@ -203,8 +262,8 @@ public class PlaytimeSDK {
             jObject.put("DFG899", Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID));
             int n = CommonUtils.getRandomNumberBetweenRange(1, 1000000);
             jObject.put("RANDOM", n);
-            Log.e("verifyAppId ORIGINAL ==>", jObject.toString());
-            Log.e("verifyAppId ENCRYPTED ==>", cipher.bytesToHex(cipher.encrypt(jObject.toString())));
+            Logger.getInstance().e("verifyAppId ORIGINAL ==>", jObject.toString());
+            Logger.getInstance().e("verifyAppId ENCRYPTED ==>", cipher.bytesToHex(cipher.encrypt(jObject.toString())));
             Call<ApiResponse> call = apiService.verifyAppId(userId, String.valueOf(n), cipher.bytesToHex(cipher.encrypt(jObject.toString())));
             call.enqueue(new Callback<ApiResponse>() {
                 @Override

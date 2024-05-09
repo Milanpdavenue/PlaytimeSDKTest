@@ -21,6 +21,10 @@ public class ResponseModel {
     private String earningPoint;
     @Expose
     private String currentTime;
+    @Expose
+    private String minDayUsage;
+    @Expose
+    private String minPlaytimeUsage;
 
     @Expose
     private ArrayList<PartnerApps> offers;
@@ -53,6 +57,14 @@ public class ResponseModel {
         return earningPoint;
     }
 
+    public String getMinDayUsage() {
+        return minDayUsage;
+    }
+
+    public String getMinPlaytimeUsage() {
+        return minPlaytimeUsage;
+    }
+
     @Override
     public String toString() {
         return "ResponseModel{" +
@@ -62,6 +74,8 @@ public class ResponseModel {
                 ", uuid='" + uuid + '\'' +
                 ", earningPoint='" + earningPoint + '\'' +
                 ", currentTime='" + currentTime + '\'' +
+                ", minDayUsage='" + minDayUsage + '\'' +
+                ", minPlaytimeUsage='" + minPlaytimeUsage + '\'' +
                 ", offers=" + offers +
                 '}';
     }

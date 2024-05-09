@@ -42,6 +42,8 @@ public class PartnerApps implements Serializable {
 
     @Ignore
     public long usage_duration;
+    @Ignore
+    public int is_any_target_completed;
 
     public PartnerApps(int task_offer_id, String task_offer_name, String package_id, int is_installed, String install_time, int conversion_id, String last_completion_time, String offer_type_id, int is_completed) {
         this.task_offer_id = task_offer_id;
@@ -68,6 +70,7 @@ public class PartnerApps implements Serializable {
                 ", offer_type_id='" + offer_type_id + '\'' +
                 ", is_completed=" + is_completed +
                 ", usage_duration=" + usage_duration +
+                ", is_any_target_completed=" + is_any_target_completed +
                 '}';
     }
 }

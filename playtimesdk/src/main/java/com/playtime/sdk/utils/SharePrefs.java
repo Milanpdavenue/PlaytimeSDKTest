@@ -11,6 +11,8 @@ public class SharePrefs {
     public static String GAID = "GAID";
     public static String UDID = "UUID";
     public static String FCM_TOKEN = "FCM_TOKEN";
+    public static String IS_SYNC_IN_PROGRESS = "IS_SYNC_IN_PROGRESS";
+
     public static SharePrefs getInstance(Context c) {
         if (instance != null) {
             return instance;
@@ -22,11 +24,20 @@ public class SharePrefs {
     public SharePrefs(Context context) {
         this.pref = context.getSharedPreferences("PlaytimeSDK", 0);
     }
+
     public void putString(String key, String val) {
         pref.edit().putString(key, val).apply();
     }
 
     public String getString(String key) {
         return pref.getString(key, "");
+    }
+
+    public void putBoolean(String key, boolean val) {
+        pref.edit().putBoolean(key, val).apply();
+    }
+
+    public boolean getBoolean(String key) {
+        return pref.getBoolean(key, false);
     }
 }

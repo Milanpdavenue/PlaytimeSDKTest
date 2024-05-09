@@ -8,6 +8,7 @@ import android.util.Log;
 import com.google.gson.Gson;
 import com.playtime.sdk.AppTrackingSetup;
 import com.playtime.sdk.BuildConfig;
+import com.playtime.sdk.PlaytimeSDK;
 import com.playtime.sdk.database.PartnerApps;
 import com.playtime.sdk.models.ApiResponse;
 import com.playtime.sdk.models.ResponseModel;
@@ -17,6 +18,7 @@ import com.playtime.sdk.repositories.PartnerAppsRepository;
 import com.playtime.sdk.utils.CommonUtils;
 import com.playtime.sdk.utils.Constants;
 import com.playtime.sdk.utils.Encryption;
+import com.playtime.sdk.utils.Logger;
 
 import org.json.JSONObject;
 
@@ -48,8 +50,8 @@ public class UpdateInstalledOfferStatusAsync {
             int n = CommonUtils.getRandomNumberBetweenRange(1, 1000000);
             jObject.put("RANDOM", n);
             ApiInterface apiService = ApiClient.getClient().create(ApiInterface.class);
-            Log.e("Offer Installed ORIGINAL ==>", jObject.toString());
-            Log.e("Offer Installed ENCRYPTED ==>", cipher.bytesToHex(cipher.encrypt(jObject.toString())));
+            Logger.getInstance().e("Offer Installed ORIGINAL ==>", jObject.toString());
+            Logger.getInstance().e("Offer Installed ENCRYPTED ==>", cipher.bytesToHex(cipher.encrypt(jObject.toString())));
             Call<ApiResponse> call = apiService.UpdateInstalledOfferStatusAsync(userId, String.valueOf(n), cipher.bytesToHex(cipher.encrypt(jObject.toString())));
             call.enqueue(new Callback<ApiResponse>() {
                 @Override
@@ -73,16 +75,17 @@ public class UpdateInstalledOfferStatusAsync {
         try {
             ResponseModel responseModel = new Gson().fromJson(new String(cipher.decrypt(response.getEncrypt())), ResponseModel.class);
             if (responseModel.getStatus().equals(Constants.STATUS_SUCCESS)) {
-                Log.e("INSTALL DATA UPDATED ==>", responseModel.toString());
+                Logger.getInstance().e("INSTALL DATA UPDATED ==>", responseModel.toString());
                 objApp.is_installed = 1;
                 objApp.install_time = responseModel.getCurrentTime();
                 objApp.last_completion_time = responseModel.getCurrentTime();
                 new PartnerAppsRepository(activity).updatePartnerApp(objApp);
                 if (objApp.offer_type_id.equals(Constants.OFFER_TYPE_PLAYTIME) || objApp.offer_type_id.equals(Constants.OFFER_TYPE_DAY)) {
                     AppTrackingSetup.startAppTracking(activity);
+                    PlaytimeSDK.getInstance().setTimer();
                 }
             } else {
-                Log.e("INSTALL DATA NOT UPDATED ==>", responseModel.toString());
+                Logger.getInstance().e("INSTALL DATA NOT UPDATED ==>", responseModel.toString());
             }
         } catch (Exception e) {
             e.printStackTrace();
