@@ -2,13 +2,13 @@ package com.playtime.sdk.repositories;
 
 import android.content.Context;
 import android.os.AsyncTask;
-import com.playtime.sdk.utils.Logger;
 
 import com.playtime.sdk.async.UpdateInstalledOfferStatusAsync;
 import com.playtime.sdk.database.AppDatabase;
 import com.playtime.sdk.database.PartnerApps;
 import com.playtime.sdk.database.PartnerAppsDao;
 import com.playtime.sdk.utils.CommonUtils;
+import com.playtime.sdk.utils.Logger;
 
 import java.util.List;
 
@@ -136,8 +136,8 @@ public class PartnerAppsRepository {
         }
     }
 
-    public void checkIsPartnerApp(String packageName, String udid, String appId, String gaId) {
-        new UpdateInstallTimeIfPackageExistInPartnerApp(mDataDao).execute(new String[]{packageName, udid, appId, gaId});
+    public void checkIsPartnerApp(String packageName, String udid, String appId, String gaId, String userId) {
+        new UpdateInstallTimeIfPackageExistInPartnerApp(mDataDao).execute(new String[]{packageName, udid, appId, gaId, userId});
     }
 
     private static class UpdateInstallTimeIfPackageExistInPartnerApp extends AsyncTask<String, Void, Void> {
@@ -146,6 +146,7 @@ public class PartnerAppsRepository {
         private String appId;
         private String udid;
         private String gaid;
+        private String userId;
         private PartnerApps objApp;
 
         UpdateInstallTimeIfPackageExistInPartnerApp(PartnerAppsDao dao) {
@@ -158,12 +159,13 @@ public class PartnerAppsRepository {
             appId = params[1];
             udid = params[2];
             gaid = params[3];
+            userId = params[4];
             objApp = mAsyncTaskDao.getPartnerAppByPackageId(params[0]);
-            Logger.getInstance().e("CHECK PARTNER APP ==>", "IS PARTNER APP?: " + packageId + " OBJ: "+objApp);
+            Logger.getInstance().e("CHECK PARTNER APP ==>", "IS PARTNER APP?: " + packageId + " OBJ: " + objApp);
             if (objApp != null && !CommonUtils.isStringNullOrEmpty(objApp.package_id) && objApp.package_id.equals(packageId)) {
                 Logger.getInstance().e("CHECK PARTNER APP ==>", "THIS IS PARTNER APP: " + packageId);
-                new UpdateInstalledOfferStatusAsync(context, packageId, appId, udid, gaid, objApp);
-            }else{
+                new UpdateInstalledOfferStatusAsync(context, packageId, appId, udid, gaid, objApp, userId);
+            } else {
                 Logger.getInstance().e("CHECK PARTNER APP ==>", "THIS IS NOT A PARTNER APP: " + packageId);
             }
             return null;

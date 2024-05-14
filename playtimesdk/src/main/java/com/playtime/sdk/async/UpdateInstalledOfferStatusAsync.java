@@ -3,7 +3,6 @@ package com.playtime.sdk.async;
 import android.content.Context;
 import android.os.Build;
 import android.provider.Settings;
-import android.util.Log;
 
 import com.google.gson.Gson;
 import com.playtime.sdk.AppTrackingSetup;
@@ -32,7 +31,7 @@ public class UpdateInstalledOfferStatusAsync {
     private Encryption cipher;
     private PartnerApps objApp;
 
-    public UpdateInstalledOfferStatusAsync(final Context activity, String packageId, String userId, String appId, String gaid, PartnerApps objApp) {
+    public UpdateInstalledOfferStatusAsync(final Context activity, String packageId, String udid, String appId, String gaid, PartnerApps objApp,String userId) {
         this.activity = activity;
         cipher = new Encryption();
         this.objApp = objApp;
@@ -40,8 +39,9 @@ public class UpdateInstalledOfferStatusAsync {
             jObject = new JSONObject();
             jObject.put("GHJKAO", packageId);
             jObject.put("LNKUIO", appId);
-            jObject.put("KVHFYI", userId);
+            jObject.put("KVHFYI", udid);
             jObject.put("NKOWEG", gaid);
+            jObject.put("WSEDRG", userId);
             jObject.put("BGHNH56", Build.MODEL);
             jObject.put("GGHNH56", Build.BRAND);
             jObject.put("BGNNH56", Build.MANUFACTURER);

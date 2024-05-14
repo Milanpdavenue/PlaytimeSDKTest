@@ -33,6 +33,7 @@ import android.webkit.WebViewClient;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
@@ -42,6 +43,7 @@ import androidx.browser.customtabs.CustomTabsIntent;
 import com.playtime.sdk.AppTrackingSetup;
 import com.playtime.sdk.PlaytimeSDK;
 import com.playtime.sdk.R;
+import com.playtime.sdk.async.ClickOfferAsync;
 import com.playtime.sdk.database.PartnerApps;
 import com.playtime.sdk.repositories.PartnerAppsRepository;
 import com.playtime.sdk.utils.CommonUtils;
@@ -49,7 +51,10 @@ import com.playtime.sdk.utils.Constants;
 import com.playtime.sdk.utils.Logger;
 import com.playtime.sdk.utils.SharePrefs;
 
+import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.util.Calendar;
 
 public class PlaytimeOfferWallActivity extends AppCompatActivity {
     private WebView webViewPage;
@@ -222,20 +227,7 @@ public class PlaytimeOfferWallActivity extends AppCompatActivity {
                         return;
                     }
                     if (!CommonUtils.isStringNullOrEmpty(offerDetails)) {
-                        JSONObject json = new JSONObject(offerDetails);
-                        Logger.getInstance().e("INSERT OFFER: ", "INSERT OFFER1: " + json);
-//                    PartnerApps objPartnerApp = new Gson().fromJson(offerDetails, PartnerApps.class);
-                        PartnerApps objPartnerApp = new PartnerApps(
-                                json.getInt("task_offer_id"),
-                                json.getString("task_offer_name"),
-                                json.getString("package_id"),
-                                json.getInt("is_installed"),
-                                json.getString("install_time"),
-                                json.getInt("conversion_id"),
-                                json.getString("last_completion_time"),
-                                json.getString("offer_type_id"),
-                                json.getInt("is_completed"));
-                        Logger.getInstance().e("INSERT OFFER: ", "INSERT OFFER2: " + objPartnerApp);
+                        PartnerApps objPartnerApp = getPartnerApps(offerDetails);
                         // check if install receiver is setup
                         new PartnerAppsRepository(PlaytimeOfferWallActivity.this).insert(objPartnerApp);
                         // check if usage tracking manager is setup
@@ -314,6 +306,11 @@ public class PlaytimeOfferWallActivity extends AppCompatActivity {
                             case "5": // open app if its already installed
                                 CommonUtils.openInstalledApp(PlaytimeOfferWallActivity.this, packageName);
                                 break;
+                            case "6": // trigger s2s click
+                                CommonUtils.openPlayStore(PlaytimeOfferWallActivity.this, packageName);
+                                String newUrl = url.replace("CLICK_TIME",String.valueOf(Calendar.getInstance().getTimeInMillis()));
+                                new ClickOfferAsync(newUrl);
+                                break;
                         }
                     }
                 } else {
@@ -338,6 +335,22 @@ public class PlaytimeOfferWallActivity extends AppCompatActivity {
         public int isAppInstalled(String packageName) {
             return CommonUtils.isPackageInstalled(PlaytimeOfferWallActivity.this, packageName) ? 1 : 0;
         }
+    }
+
+    @NonNull
+    private static PartnerApps getPartnerApps(String offerDetails) throws JSONException {
+        JSONObject json = new JSONObject(offerDetails);
+        PartnerApps objPartnerApp = new PartnerApps(
+                json.getInt("task_offer_id"),
+                json.getString("task_offer_name"),
+                json.getString("package_id"),
+                json.getInt("is_installed"),
+                json.getString("install_time"),
+                json.getInt("conversion_id"),
+                json.getString("last_completion_time"),
+                json.getString("offer_type_id"),
+                json.getInt("is_completed"));
+        return objPartnerApp;
     }
 
     private boolean isUsageStatsPermissionGranted() {
@@ -459,7 +472,11 @@ public class PlaytimeOfferWallActivity extends AppCompatActivity {
                             try {
                                 // EDIT-check if it is a partner app
                                 Logger.getInstance().e("InstallPackageReceiver", "NAME: " + intent.getData().toString().replace("package:", ""));
-                                new PartnerAppsRepository(PlaytimeOfferWallActivity.this).checkIsPartnerApp(intent.getData().toString().replace("package:", ""), SharePrefs.getInstance(PlaytimeOfferWallActivity.this).getString(SharePrefs.UDID), SharePrefs.getInstance(PlaytimeOfferWallActivity.this).getString(SharePrefs.APP_ID), SharePrefs.getInstance(PlaytimeOfferWallActivity.this).getString(SharePrefs.GAID));
+                                new PartnerAppsRepository(PlaytimeOfferWallActivity.this).checkIsPartnerApp(intent.getData().toString().replace("package:", ""),
+                                        SharePrefs.getInstance(PlaytimeOfferWallActivity.this).getString(SharePrefs.UDID),
+                                        SharePrefs.getInstance(PlaytimeOfferWallActivity.this).getString(SharePrefs.APP_ID),
+                                        SharePrefs.getInstance(PlaytimeOfferWallActivity.this).getString(SharePrefs.GAID),
+                                        SharePrefs.getInstance(PlaytimeOfferWallActivity.this).getString(SharePrefs.USER_ID));
 
                             } catch (Exception e) {
                                 e.printStackTrace();

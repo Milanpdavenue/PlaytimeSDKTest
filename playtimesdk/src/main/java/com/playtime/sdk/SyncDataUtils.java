@@ -8,8 +8,9 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.provider.Settings;
 
+import androidx.annotation.NonNull;
+
 import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 import com.playtime.sdk.database.AppDatabase;
 import com.playtime.sdk.database.PartnerApps;
 import com.playtime.sdk.database.PartnerAppsDao;
@@ -24,6 +25,7 @@ import com.playtime.sdk.utils.Logger;
 import com.playtime.sdk.utils.SharePrefs;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
@@ -71,7 +73,28 @@ public class SyncDataUtils {
                         @Override
                         public void run() {
                             try {
-                                ResponseModel responseModel = new Gson().fromJson(new String(cipher.decrypt(response.body().getEncrypt())), ResponseModel.class);
+                                String jsonString = new String(cipher.decrypt(response.body().getEncrypt()));
+                                JSONObject json = new JSONObject(jsonString);
+                                ResponseModel responseModel = new Gson().fromJson(jsonString, ResponseModel.class);
+                                JSONArray array = json.getJSONArray("offers");
+                                if (array.length() > 0) {
+                                    ArrayList<PartnerApps> list = new ArrayList<>();
+                                    for (int i = 0; i < array.length(); i++) {
+                                        PartnerApps objPartnerApp = new PartnerApps(
+                                                array.getJSONObject(i).getInt("task_offer_id"),
+                                                array.getJSONObject(i).getString("task_offer_name"),
+                                                array.getJSONObject(i).getString("package_id"),
+                                                array.getJSONObject(i).getInt("is_installed"),
+                                                array.getJSONObject(i).getString("install_time"),
+                                                array.getJSONObject(i).getInt("conversion_id"),
+                                                array.getJSONObject(i).getString("last_completion_time"),
+                                                array.getJSONObject(i).getString("offer_type_id"),
+                                                array.getJSONObject(i).getInt("is_completed"));
+                                        list.add(objPartnerApp);
+                                    }
+                                    responseModel.setOffers(list);
+                                }
+//                                ResponseModel responseModel = new Gson().fromJson(new String(cipher.decrypt(response.body().getEncrypt())), ResponseModel.class);
                                 PartnerAppsDao dao = AppDatabase.getInstance(context).partnerAppsDao();
                                 ArrayList<PartnerApps> listLocalApps = (ArrayList<PartnerApps>) dao.getAllPlaytimeOffers();
                                 Logger.getInstance().e("LOCAL OFFERS ==>", "SIZE: " + listLocalApps.size() + " DATA: " + listLocalApps.toString());
@@ -205,14 +228,22 @@ public class SyncDataUtils {
                 if (isUpdateUsageData) {
                     Logger.getInstance().e("NOW SYNC USAGE STATUS ==>", listOnGoingApps.toString());
                     // NOW SEND ALL DATA TO SERVER
-                    Gson gson = new Gson();
+//                    Gson gson = new Gson();
+//
+//                    String listString = gson.toJson(
+//                            listOnGoingApps,
+//                            new TypeToken<ArrayList<PartnerApps>>() {
+//                            }.getType());
 
-                    String listString = gson.toJson(
-                            listOnGoingApps,
-                            new TypeToken<ArrayList<PartnerApps>>() {
-                            }.getType());
-
-                    JSONArray jsonArray = new JSONArray(listString);
+                    JSONArray jsonArray = new JSONArray();
+                    for (int i = 0; i < listOnGoingApps.size(); i++) {
+                        try {
+                            JSONObject jsonObject1 = getJsonObject(listOnGoingApps, i);
+                            jsonArray.put(jsonObject1);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
 
                     JSONObject jObject = new JSONObject();
                     jObject.put("PLOKTH", SharePrefs.getInstance(context).getString(SharePrefs.APP_ID));
@@ -245,7 +276,29 @@ public class SyncDataUtils {
                                 @Override
                                 public void run() {
                                     try {
-                                        ResponseModel responseModel = new Gson().fromJson(new String(cipher.decrypt(response.body().getEncrypt())), ResponseModel.class);
+                                        String jsonString = new String(cipher.decrypt(response.body().getEncrypt()));
+                                        JSONObject json = new JSONObject(jsonString);
+                                        ResponseModel responseModel = new Gson().fromJson(jsonString, ResponseModel.class);
+                                        JSONArray array = json.getJSONArray("offers");
+                                        if (array.length() > 0) {
+                                            ArrayList<PartnerApps> list = new ArrayList<>();
+                                            for (int i = 0; i < array.length(); i++) {
+                                                PartnerApps objPartnerApp = new PartnerApps(
+                                                        array.getJSONObject(i).getInt("task_offer_id"),
+                                                        array.getJSONObject(i).getString("task_offer_name"),
+                                                        array.getJSONObject(i).getString("package_id"),
+                                                        array.getJSONObject(i).getInt("is_installed"),
+                                                        array.getJSONObject(i).getString("install_time"),
+                                                        array.getJSONObject(i).getInt("conversion_id"),
+                                                        array.getJSONObject(i).getString("last_completion_time"),
+                                                        array.getJSONObject(i).getString("offer_type_id"),
+                                                        array.getJSONObject(i).getInt("is_completed"));
+                                                list.add(objPartnerApp);
+                                            }
+                                            responseModel.setOffers(list);
+                                        }
+
+//                                        ResponseModel responseModel = new Gson().fromJson(new String(cipher.decrypt(response.body().getEncrypt())), ResponseModel.class);
                                         Logger.getInstance().e("updatePlaytime ", "updatePlaytime RESPONSE: " + responseModel.toString());
                                         if (responseModel.getStatus().equals(Constants.STATUS_SUCCESS)) {
                                             try {
@@ -285,6 +338,23 @@ public class SyncDataUtils {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    @NonNull
+    private static JSONObject getJsonObject(ArrayList<PartnerApps> listOnGoingApps, int i) throws JSONException {
+        JSONObject jsonObject1 = new JSONObject();
+        jsonObject1.put("task_offer_id", listOnGoingApps.get(i).task_offer_id);
+        jsonObject1.put("task_offer_name", listOnGoingApps.get(i).task_offer_name);
+        jsonObject1.put("package_id", listOnGoingApps.get(i).package_id);
+        jsonObject1.put("is_installed", listOnGoingApps.get(i).is_installed);
+        jsonObject1.put("install_time", listOnGoingApps.get(i).install_time);
+        jsonObject1.put("conversion_id", listOnGoingApps.get(i).conversion_id);
+        jsonObject1.put("last_completion_time", listOnGoingApps.get(i).last_completion_time);
+        jsonObject1.put("offer_type_id", listOnGoingApps.get(i).offer_type_id);
+        jsonObject1.put("is_completed", listOnGoingApps.get(i).is_completed);
+        jsonObject1.put("usage_duration", listOnGoingApps.get(i).usage_duration);
+        jsonObject1.put("is_any_target_completed", listOnGoingApps.get(i).is_any_target_completed);
+        return jsonObject1;
     }
 
     private void finishSyncAndStopWorkManagerIfRequired(Context context, PartnerAppsDao dao) {

@@ -7,7 +7,6 @@ import androidx.room.Ignore;
 import androidx.room.PrimaryKey;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 
 @Entity(tableName = "PartnerApps")
 public class PartnerApps implements Serializable {

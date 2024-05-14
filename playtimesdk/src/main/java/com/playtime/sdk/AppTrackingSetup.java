@@ -27,6 +27,7 @@ public class AppTrackingSetup {
 
     public static void stopTracking(Context context) {
         try {
+            Logger.getInstance().e("STOP WORK MANAGER","STOP WORK MANAGER=== stopTracking");
             WorkManager.getInstance(context).cancelAllWorkByTag(CHECK_USAGE_STATUS_WORKER);
         } catch (Exception e) {
             e.printStackTrace();

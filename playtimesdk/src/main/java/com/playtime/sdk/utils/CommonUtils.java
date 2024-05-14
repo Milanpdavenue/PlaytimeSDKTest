@@ -417,4 +417,23 @@ public class CommonUtils {
             setToast(context, "Application not found");
         }
     }
+
+    public static void openPlayStore(Context context, String appPackage) {
+        try {
+            Intent intents = context.getPackageManager().getLaunchIntentForPackage(appPackage);
+
+            if (intents == null) {
+                context.startActivity(new Intent(Intent.ACTION_VIEW,
+                        Uri.parse("market://details?id=" + appPackage))
+                        .setPackage(Constants.PLAY_STORE_PACKAGE_NAME)
+                        .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_NO_ANIMATION));
+            } else {
+                intents.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_NO_ANIMATION);
+                context.startActivity(intents);
+            }
+        } catch (ActivityNotFoundException e) {
+            context.startActivity(new Intent(Intent.ACTION_VIEW,
+                    Uri.parse("http://play.google.com/store/apps/details?id=" + appPackage)).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_NO_ANIMATION));
+        }
+    }
 }

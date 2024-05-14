@@ -77,6 +77,10 @@ public class ResponseModel {
         return minPlaytimeUsage;
     }
 
+    public void setOffers(ArrayList<PartnerApps> offers) {
+        this.offers = offers;
+    }
+
     @Override
     public String toString() {
         return "ResponseModel{" + "message='" + message + '\'' + ", status='" + status + '\'' + ", points='" + points + '\'' + ", uuid='" + uuid + '\'' + ", earningPoint='" + earningPoint + '\'' + ", currentTime='" + currentTime + '\'' + ", minDayUsage='" + minDayUsage + '\'' + ", minPlaytimeUsage='" + minPlaytimeUsage + '\'' + ", offers=" + offers + '}';

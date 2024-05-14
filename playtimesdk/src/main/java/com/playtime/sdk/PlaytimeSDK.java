@@ -43,7 +43,6 @@ import retrofit2.Response;
 
 @Keep
 public class PlaytimeSDK {
-    //    private final String baseUrl = "https://appcampaign.in/playtime_sdk/web_view/index.php";
     private String defaultUrl;
     private Boolean isInitialized = false;
     private String appId;
@@ -275,6 +274,7 @@ public class PlaytimeSDK {
             jObject.put("XDV465", appId);
             jObject.put("SDV465", userId);
             jObject.put("DF456DF", gaIdStr);
+            jObject.put("YHUJIO", SharePrefs.getInstance(context).getString(SharePrefs.UDID));
             jObject.put("QW23GB", fcmToken);
             jObject.put("GB45TGG", Build.MODEL);
             jObject.put("212E4D6", Build.BRAND);
