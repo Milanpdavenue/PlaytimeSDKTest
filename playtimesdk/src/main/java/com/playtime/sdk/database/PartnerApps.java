@@ -38,13 +38,16 @@ public class PartnerApps implements Serializable {
 
     @ColumnInfo(name = "is_completed")
     public int is_completed;
+    @ColumnInfo(name = "click_time")
+    public long click_time;
 
     @Ignore
     public long usage_duration;
     @Ignore
     public int is_any_target_completed;
 
-    public PartnerApps(int task_offer_id, String task_offer_name, String package_id, int is_installed, String install_time, int conversion_id, String last_completion_time, String offer_type_id, int is_completed) {
+    public PartnerApps(int task_offer_id, String task_offer_name, String package_id, int is_installed, String install_time,
+                       int conversion_id, String last_completion_time, String offer_type_id, int is_completed) {
         this.task_offer_id = task_offer_id;
         this.task_offer_name = task_offer_name;
         this.package_id = package_id;

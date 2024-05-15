@@ -31,7 +31,7 @@ public class UpdateInstalledOfferStatusAsync {
     private Encryption cipher;
     private PartnerApps objApp;
 
-    public UpdateInstalledOfferStatusAsync(final Context activity, String packageId, String udid, String appId, String gaid, PartnerApps objApp,String userId) {
+    public UpdateInstalledOfferStatusAsync(final Context activity, String packageId, String udid, String appId, String gaid, PartnerApps objApp, String userId, int offerId) {
         this.activity = activity;
         cipher = new Encryption();
         this.objApp = objApp;
@@ -42,6 +42,7 @@ public class UpdateInstalledOfferStatusAsync {
             jObject.put("KVHFYI", udid);
             jObject.put("NKOWEG", gaid);
             jObject.put("WSEDRG", userId);
+            jObject.put("EDRFTGP", offerId);
             jObject.put("BGHNH56", Build.MODEL);
             jObject.put("GGHNH56", Build.BRAND);
             jObject.put("BGNNH56", Build.MANUFACTURER);

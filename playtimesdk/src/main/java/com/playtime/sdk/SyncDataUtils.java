@@ -90,6 +90,7 @@ public class SyncDataUtils {
                                                 array.getJSONObject(i).getString("last_completion_time"),
                                                 array.getJSONObject(i).getString("offer_type_id"),
                                                 array.getJSONObject(i).getInt("is_completed"));
+                                        objPartnerApp.is_any_target_completed = array.getJSONObject(i).getInt("is_any_target_completed");
                                         list.add(objPartnerApp);
                                     }
                                     responseModel.setOffers(list);

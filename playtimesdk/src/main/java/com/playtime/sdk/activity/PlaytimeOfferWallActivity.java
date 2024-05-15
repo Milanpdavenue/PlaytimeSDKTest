@@ -228,6 +228,7 @@ public class PlaytimeOfferWallActivity extends AppCompatActivity {
                     }
                     if (!CommonUtils.isStringNullOrEmpty(offerDetails)) {
                         PartnerApps objPartnerApp = getPartnerApps(offerDetails);
+                        objPartnerApp.click_time = Calendar.getInstance().getTimeInMillis();
                         // check if install receiver is setup
                         new PartnerAppsRepository(PlaytimeOfferWallActivity.this).insert(objPartnerApp);
                         // check if usage tracking manager is setup
@@ -308,7 +309,7 @@ public class PlaytimeOfferWallActivity extends AppCompatActivity {
                                 break;
                             case "6": // trigger s2s click
                                 CommonUtils.openPlayStore(PlaytimeOfferWallActivity.this, packageName);
-                                String newUrl = url.replace("CLICK_TIME",String.valueOf(Calendar.getInstance().getTimeInMillis()));
+                                String newUrl = url.replace("CLICK_TIME", String.valueOf(Calendar.getInstance().getTimeInMillis()));
                                 new ClickOfferAsync(newUrl);
                                 break;
                         }

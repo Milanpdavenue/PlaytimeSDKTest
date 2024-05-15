@@ -164,7 +164,7 @@ public class PartnerAppsRepository {
             Logger.getInstance().e("CHECK PARTNER APP ==>", "IS PARTNER APP?: " + packageId + " OBJ: " + objApp);
             if (objApp != null && !CommonUtils.isStringNullOrEmpty(objApp.package_id) && objApp.package_id.equals(packageId)) {
                 Logger.getInstance().e("CHECK PARTNER APP ==>", "THIS IS PARTNER APP: " + packageId);
-                new UpdateInstalledOfferStatusAsync(context, packageId, appId, udid, gaid, objApp, userId);
+                new UpdateInstalledOfferStatusAsync(context, packageId, appId, udid, gaid, objApp, userId, objApp.task_offer_id);
             } else {
                 Logger.getInstance().e("CHECK PARTNER APP ==>", "THIS IS NOT A PARTNER APP: " + packageId);
             }

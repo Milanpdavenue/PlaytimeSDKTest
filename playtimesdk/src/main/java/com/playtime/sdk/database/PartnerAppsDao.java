@@ -23,7 +23,7 @@ public interface PartnerAppsDao {
     @Query("SELECT count(task_offer_id) FROM PartnerApps WHERE task_offer_id = :itemId")
     int isPartnerAppExist(int itemId);
 
-    @Query("SELECT * FROM PartnerApps WHERE package_id = :itemId")
+    @Query("SELECT * FROM PartnerApps WHERE package_id = :itemId ORDER BY click_time DESC")
     PartnerApps getPartnerAppByPackageId(String itemId);
 
     @Query("SELECT package_id FROM PartnerApps")
