@@ -26,8 +26,8 @@ android {
         minSdk 23
         targetSdk 33
         versionCode 1
-        versionName "1.0.60"
-        buildConfigField 'String', 'VERSION_NAME', "\"1.0.60\""
+        versionName "1.0.0"
+        buildConfigField 'String', 'VERSION_NAME', "\"1.0.0\""
         aarMetadata {
             minCompileSdk = 33
         }
@@ -82,7 +82,7 @@ publishing {
         maven(MavenPublication) {
             groupId = 'com.github.Milanpdavenue'
             artifactId = 'PlaytimeSDKTest'
-            version = "1.0.60"
+            version = "1.0.0"
             pom {
                 description = 'First PlaytimeSDK'
             }
@@ -119,4 +119,5 @@ dependencies {
     def room_version = "2.4.2"
     api "androidx.room:room-runtime:$room_version"
     annotationProcessor "androidx.room:room-compiler:$room_version"
+    implementation 'com.facebook.shimmer:shimmer:0.5.0'
 }

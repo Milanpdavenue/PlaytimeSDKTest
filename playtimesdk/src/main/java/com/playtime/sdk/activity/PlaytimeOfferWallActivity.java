@@ -40,6 +40,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatButton;
 import androidx.browser.customtabs.CustomTabsIntent;
 
+import com.facebook.shimmer.ShimmerFrameLayout;
 import com.playtime.sdk.AppTrackingSetup;
 import com.playtime.sdk.PlaytimeSDK;
 import com.playtime.sdk.R;
@@ -64,6 +65,7 @@ public class PlaytimeOfferWallActivity extends AppCompatActivity {
     private Drawable appIconBitmap;
     private static long mLastClickTime = 0;
     private boolean isFirstTime = true;
+    private ShimmerFrameLayout shimmerLayout;
 
     public PlaytimeOfferWallActivity() {
     }
@@ -78,10 +80,12 @@ public class PlaytimeOfferWallActivity extends AppCompatActivity {
         }
         setContentView(R.layout.activity_playtime_offerwall);
 
-        if (CommonUtils.isNetworkAvailable(PlaytimeOfferWallActivity.this)) {
-            registerPackageInstallBroadCast();
-            registerDeviceStatusBroadCast();
+        setViews();
+    }
 
+    private void setViews() {
+        shimmerLayout = findViewById(R.id.shimmer_layout);
+        if (CommonUtils.isNetworkAvailable(PlaytimeOfferWallActivity.this)) {
             applicationName = getIntent().getStringExtra("applicationName");
             urlPage = getIntent().getStringExtra("url");
             Logger.getInstance().e("PlaytimeOfferWallActivity URL===", urlPage);
@@ -187,6 +191,7 @@ public class PlaytimeOfferWallActivity extends AppCompatActivity {
                 @Override
                 public void onPageFinished(WebView view, String url) {
                     super.onPageFinished(view, url);
+                    shimmerLayout.setVisibility(View.GONE);
                     if (isFirstTime) {
                         if (!SharePrefs.getInstance(PlaytimeOfferWallActivity.this).getBoolean(SharePrefs.IS_CONSENT_GIVEN)) {
                             final Handler handler = new Handler(Looper.getMainLooper());
@@ -205,6 +210,8 @@ public class PlaytimeOfferWallActivity extends AppCompatActivity {
             CommonUtils.setToast(PlaytimeOfferWallActivity.this, "No internet connection");
 //          CommonUtils.Notify(PlaytimeOfferWallActivity.this, "No Internet Connection", "It seems you are not connected to internet. Please turn on internet connection and try again.", true);
         }
+        registerPackageInstallBroadCast();
+        registerDeviceStatusBroadCast();
     }
 
     public class JSInterface {

@@ -176,9 +176,9 @@ public class PlaytimeSDK {
                 intent.putExtra("userId", this.uuId);
                 intent.putExtra("gaId", this.gaIdStr);
                 context.startActivity(intent);
-                if (context instanceof Activity) {
-                    ((Activity) context).overridePendingTransition(R.anim.fadein, R.anim.fadeout);
-                }
+//                if (context instanceof Activity) {
+//                    ((Activity) context).overridePendingTransition(R.anim.fadein, R.anim.fadeout);
+//                }
             }
         } else {
             CommonUtils.setToast(context, "No internet connection");
