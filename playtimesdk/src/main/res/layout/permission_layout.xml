@@ -84,7 +84,7 @@
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 
-    <androidx.appcompat.widget.AppCompatButton
+    <android.widget.Button
         android:id="@+id/btnok"
         android:layout_width="0dp"
         android:layout_height="@dimen/dim_45"

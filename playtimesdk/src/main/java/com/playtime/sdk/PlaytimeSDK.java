@@ -53,7 +53,7 @@ public class PlaytimeSDK {
     private OfferWallInitListener listener;
     private static PlaytimeSDK instance;
     public static BroadcastReceiver packageInstallBroadcast;
-    public static BroadcastReceiver deviceStatusBroadcast;
+    //    public static BroadcastReceiver deviceStatusBroadcast;
     private CountDownTimer timer;
 
     public PlaytimeSDK() {
@@ -327,6 +327,15 @@ public class PlaytimeSDK {
                 isInitialized = true;
                 if (listener != null) {
                     listener.onInitSuccess();
+                }
+            } else if (responseModel.getStatus().equals(Constants.STATUS_MAINTENANCE)) {
+                if (context instanceof Activity) {
+                    CommonUtils.showPopup(context, responseModel.getMessageHTML());
+                } else {
+                    CommonUtils.setToast(context, responseModel.getMessage());
+                }
+                if (listener != null) {
+                    listener.onInitFailed(responseModel.getMessage());
                 }
             } else {
                 if (listener != null) {

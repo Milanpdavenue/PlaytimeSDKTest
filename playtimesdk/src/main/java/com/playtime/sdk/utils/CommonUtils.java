@@ -194,6 +194,36 @@ public class CommonUtils {
         }
     }
 
+    public static void showPopup(Context activity,String message) {
+        try {
+            if (activity != null) {
+                final Dialog dialog1 = new Dialog(activity, android.R.style.Theme_Light);
+                dialog1.getWindow().setBackgroundDrawableResource(R.color.black_transparent);
+                dialog1.requestWindowFeature(Window.FEATURE_NO_TITLE);
+                dialog1.getWindow().addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+                dialog1.setContentView(R.layout.popup_notify);
+                dialog1.setCancelable(false);
+
+                Button btnOk = dialog1.findViewById(R.id.btnOk);
+                btnOk.setText("Ok");
+                Button btnCancel = dialog1.findViewById(R.id.btnCancel);
+                btnCancel.setVisibility(View.GONE);
+                TextView tvTitle = dialog1.findViewById(R.id.tvTitle);
+                tvTitle.setText(activity.getString(R.string.sdk_app_name));
+
+                TextView tvMessage = dialog1.findViewById(R.id.tvMessage);
+                tvMessage.setText(Html.fromHtml(message));
+
+                btnOk.setOnClickListener(v -> {
+                    dialog1.dismiss();
+                });
+                dialog1.show();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     public static boolean launchApp(Context context, String packageName) {
         Intent launchIntent = context.getPackageManager().getLaunchIntentForPackage(packageName);
         if (launchIntent != null) {

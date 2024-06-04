@@ -12,6 +12,8 @@ public class ResponseModel {
     @Expose
     private String message;
     @Expose
+    private String messageHTML;
+    @Expose
     private String status;
     @Expose
     private String points;
@@ -29,6 +31,10 @@ public class ResponseModel {
     private String consentTitle;
     @Expose
     private String consentMessage;
+
+    public String getMessageHTML() {
+        return messageHTML;
+    }
 
     @Expose
     private ArrayList<PartnerApps> offers;

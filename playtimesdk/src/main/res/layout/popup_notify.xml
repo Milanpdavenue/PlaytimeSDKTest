@@ -50,7 +50,7 @@
             android:layout_marginStart="@dimen/dim_50"
             android:layout_marginTop="@dimen/dim_20"
             android:layout_marginEnd="@dimen/dim_50"
-            android:layout_marginBottom="@dimen/dim_10"
+            android:layout_marginBottom="@dimen/dim_15"
             android:background="@drawable/bg_btn"
             android:elevation="@dimen/dim_2"
             android:gravity="center"

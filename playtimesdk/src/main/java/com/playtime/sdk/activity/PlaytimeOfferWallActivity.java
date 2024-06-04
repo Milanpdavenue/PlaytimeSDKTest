@@ -30,6 +30,7 @@ import android.webkit.WebResourceRequest;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -200,7 +201,7 @@ public class PlaytimeOfferWallActivity extends AppCompatActivity {
                                 public void run() {
                                     CommonUtils.showConsentPopup(PlaytimeOfferWallActivity.this, SharePrefs.getInstance(PlaytimeOfferWallActivity.this).getString(SharePrefs.CONSENT_TITLE), SharePrefs.getInstance(PlaytimeOfferWallActivity.this).getString(SharePrefs.CONSENT_MESSAGE));
                                 }
-                            }, 3000);
+                            }, 1500);
                         }
                     }
                     isFirstTime = false;
@@ -211,7 +212,7 @@ public class PlaytimeOfferWallActivity extends AppCompatActivity {
 //          CommonUtils.Notify(PlaytimeOfferWallActivity.this, "No Internet Connection", "It seems you are not connected to internet. Please turn on internet connection and try again.", true);
         }
         registerPackageInstallBroadCast();
-        registerDeviceStatusBroadCast();
+//        registerDeviceStatusBroadCast();
     }
 
     public class JSInterface {
@@ -390,7 +391,7 @@ public class PlaytimeOfferWallActivity extends AppCompatActivity {
             dialog.setCancelable(true);
             dialog.setContentView(R.layout.permission_layout);
             dialog.getWindow().setBackgroundDrawableResource(R.color.black_transparent);
-            AppCompatButton ok = dialog.findViewById(R.id.btnok);
+            Button ok = dialog.findViewById(R.id.btnok);
             AppCompatButton dialogBtn_cancel = dialog.findViewById(R.id.btncancel);
             TextView tvApplicationName = dialog.findViewById(R.id.tv_applicationName);
             ImageView ivApplicationIcon = dialog.findViewById(R.id.iv_applicationIcon);
@@ -504,35 +505,35 @@ public class PlaytimeOfferWallActivity extends AppCompatActivity {
         }
     }
 
-    private void registerDeviceStatusBroadCast() {
-        try {
-            if (PlaytimeSDK.deviceStatusBroadcast == null) {
-                IntentFilter intentFilter = new IntentFilter();
-                intentFilter.addAction(Intent.ACTION_BOOT_COMPLETED);
-                intentFilter.addAction(Intent.ACTION_DREAMING_STARTED);
-                intentFilter.addAction(Intent.ACTION_DREAMING_STOPPED);
-                intentFilter.addAction(Intent.ACTION_USER_PRESENT);
-                PlaytimeSDK.deviceStatusBroadcast = new BroadcastReceiver() {
-                    @Override
-                    public void onReceive(Context context, Intent intent) {
-                        try {
-                            Logger.getInstance().e("DeviceStatusBroadCast", "NAME: " + intent.getAction());
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
-                    }
-                };
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    registerReceiver(PlaytimeSDK.deviceStatusBroadcast, intentFilter, RECEIVER_EXPORTED);
-                } else {
-                    registerReceiver(PlaytimeSDK.deviceStatusBroadcast, intentFilter);
-                }
-                Logger.getInstance().e("DeviceStatusBroadCast onCreate=======", "REGISTER");
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
+//    private void registerDeviceStatusBroadCast() {
+//        try {
+//            if (PlaytimeSDK.deviceStatusBroadcast == null) {
+//                IntentFilter intentFilter = new IntentFilter();
+//                intentFilter.addAction(Intent.ACTION_BOOT_COMPLETED);
+//                intentFilter.addAction(Intent.ACTION_DREAMING_STARTED);
+//                intentFilter.addAction(Intent.ACTION_DREAMING_STOPPED);
+//                intentFilter.addAction(Intent.ACTION_USER_PRESENT);
+//                PlaytimeSDK.deviceStatusBroadcast = new BroadcastReceiver() {
+//                    @Override
+//                    public void onReceive(Context context, Intent intent) {
+//                        try {
+//                            Logger.getInstance().e("DeviceStatusBroadCast", "NAME: " + intent.getAction());
+//                        } catch (Exception e) {
+//                            e.printStackTrace();
+//                        }
+//                    }
+//                };
+//                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+//                    registerReceiver(PlaytimeSDK.deviceStatusBroadcast, intentFilter, RECEIVER_EXPORTED);
+//                } else {
+//                    registerReceiver(PlaytimeSDK.deviceStatusBroadcast, intentFilter);
+//                }
+//                Logger.getInstance().e("DeviceStatusBroadCast onCreate=======", "REGISTER");
+//            }
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+//    }
 
     private void unregisterReceiver() {
         try {
@@ -541,14 +542,14 @@ public class PlaytimeOfferWallActivity extends AppCompatActivity {
                 PlaytimeSDK.packageInstallBroadcast = null;
                 Logger.getInstance().e("packageInstallBroadcast onDestroy=======", "UNREGISTER");
             }
-            if (PlaytimeSDK.deviceStatusBroadcast != null) {
-                unregisterReceiver(PlaytimeSDK.deviceStatusBroadcast);
-                PlaytimeSDK.deviceStatusBroadcast = null;
-                Logger.getInstance().e("DeviceStatusBroadCast onDestroy=======", "UNREGISTER");
-            }
+//            if (PlaytimeSDK.deviceStatusBroadcast != null) {
+//                unregisterReceiver(PlaytimeSDK.deviceStatusBroadcast);
+//                PlaytimeSDK.deviceStatusBroadcast = null;
+//                Logger.getInstance().e("DeviceStatusBroadCast onDestroy=======", "UNREGISTER");
+//            }
         } catch (Exception e) {
             PlaytimeSDK.packageInstallBroadcast = null;
-            PlaytimeSDK.deviceStatusBroadcast = null;
+//            PlaytimeSDK.deviceStatusBroadcast = null;
             e.printStackTrace();
         }
     }
