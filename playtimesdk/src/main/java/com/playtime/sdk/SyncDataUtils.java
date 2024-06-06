@@ -59,8 +59,6 @@ public class SyncDataUtils {
             int n = CommonUtils.getRandomNumberBetweenRange(1, 1000000);
             jObject.put("RANDOM", n);
             ApiInterface apiService = ApiClient.getClient().create(ApiInterface.class);
-            Logger.getInstance().e("getOnGoingApps ORIGINAL ==>", jObject.toString());
-            Logger.getInstance().e("getOnGoingApps ENCRYPTED ==>", cipher.bytesToHex(cipher.encrypt(jObject.toString())));
             Call<ApiResponse> call = apiService.getOnGoingApps(SharePrefs.getInstance(context).getString(SharePrefs.USER_ID), String.valueOf(n), cipher.bytesToHex(cipher.encrypt(jObject.toString())));
             call.enqueue(new Callback<ApiResponse>() {
                 @Override
@@ -95,23 +93,18 @@ public class SyncDataUtils {
                                     }
                                     responseModel.setOffers(list);
                                 }
-//                                ResponseModel responseModel = new Gson().fromJson(new String(cipher.decrypt(response.body().getEncrypt())), ResponseModel.class);
                                 PartnerAppsDao dao = AppDatabase.getInstance(context).partnerAppsDao();
                                 ArrayList<PartnerApps> listLocalApps = (ArrayList<PartnerApps>) dao.getAllPlaytimeOffers();
-                                Logger.getInstance().e("LOCAL OFFERS ==>", "SIZE: " + listLocalApps.size() + " DATA: " + listLocalApps.toString());
                                 if (responseModel.getStatus().equals(Constants.STATUS_SUCCESS)) {
-                                    Logger.getInstance().e("getOnGoingApps SUCCESS OFFERS ==>", "SIZE: " + responseModel.getOffers().size() + " DATA: " + responseModel.toString());
                                     if (responseModel.getOffers() != null && !responseModel.getOffers().isEmpty()) {
                                         // If user uninstall and reinstall app, sync all data from server
                                         if (listLocalApps.isEmpty()) {
                                             // Insert all
                                             dao.insertAll(responseModel.getOffers());
-                                            Logger.getInstance().e("NO LOCAL OFFERS Found==>", "INSERT ALL from api");
                                         } else { // Sync offer data & target data with local DB
                                             try {
                                                 dao.deleteOnlyInstalledOffers();
                                                 dao.insertAll(responseModel.getOffers());
-                                                Logger.getInstance().e("SYNC OFFERS ==>", "SYNC OFFERS WITH LOCAL DB " + responseModel.getOffers());
                                             } catch (Exception e) {
                                                 e.printStackTrace();
                                             }
@@ -120,7 +113,6 @@ public class SyncDataUtils {
                                         try {
                                             if (listLocalApps.size() > 0) {
                                                 dao.deleteOnlyInstalledOffers();
-                                                Logger.getInstance().e("SYNC OFFERS ==>", "DELETE OFFER WITH LOCAL DB " + responseModel.getOffers());
                                             }
                                         } catch (Exception e) {
                                             e.printStackTrace();
@@ -128,7 +120,6 @@ public class SyncDataUtils {
                                     }
                                     syncData(context, responseModel.getOffers(), CommonUtils.formatDate(responseModel.getCurrentTime()).getTime(), cipher, dao, Integer.parseInt(responseModel.getMinDayUsage()), Integer.parseInt(responseModel.getMinPlaytimeUsage()));
                                 } else {
-                                    Logger.getInstance().e("getOnGoingApps ERROR ==>", responseModel.toString());
                                     syncData(context, responseModel.getOffers(), CommonUtils.formatDate(responseModel.getCurrentTime()).getTime(), cipher, dao, Integer.parseInt(responseModel.getMinDayUsage()), Integer.parseInt(responseModel.getMinPlaytimeUsage()));
                                 }
                             } catch (Exception e) {
@@ -155,18 +146,15 @@ public class SyncDataUtils {
 
     private void syncData(Context context, ArrayList<PartnerApps> listOnGoingApps, long currentTime, Encryption cipher, PartnerAppsDao dao, int minDayUsage, int minPlaytimeUsage) {
         try {
-            Logger.getInstance().e("=============================", "=================GET USAGE====================");
             boolean isUpdateUsageData = false;
             if (listOnGoingApps != null && !listOnGoingApps.isEmpty()) {
                 UsageStatsManager mUsageStatsManager = (UsageStatsManager) context.getSystemService(Context.USAGE_STATS_SERVICE);
 //                long currentTime = CommonUtils.formatDate(responseModel.getCurrentTime()).getTime();
                 for (int i = 0; i < listOnGoingApps.size(); i++) {
                     try {
-                        Logger.getInstance().e("IS PACKAGE INSTALLED", "IS PACKAGE INSTALLED --> " + CommonUtils.isPackageInstalled(context, listOnGoingApps.get(i).package_id));
                         if (listOnGoingApps.get(i).is_completed == 0 && !CommonUtils.isStringNullOrEmpty(listOnGoingApps.get(i).last_completion_time) && CommonUtils.isPackageInstalled(context, listOnGoingApps.get(i).package_id)) {
                             if (listOnGoingApps.get(i).offer_type_id.equals(Constants.OFFER_TYPE_PLAYTIME)) {
                                 long lastTime = CommonUtils.formatDate(listOnGoingApps.get(i).last_completion_time).getTime();
-                                Logger.getInstance().e("GET PLAYTIME USAGE", "GET PLAYTIME USAGE FROM: " + CommonUtils.getStringDateTime(lastTime) + " TO: " + CommonUtils.getStringDateTime(currentTime));
                                 Map<String, UsageStats> aggregatedStatsMap = mUsageStatsManager.queryAndAggregateUsageStats(lastTime, currentTime);
 
                                 // Get stats for particular package as follows:
@@ -177,15 +165,11 @@ public class SyncDataUtils {
                                         listOnGoingApps.get(i).usage_duration = duration;
                                         isUpdateUsageData = true;
                                     }
-                                    Logger.getInstance().e("GET USAGE PLAYTIME==>", "OFFER ID: " + listOnGoingApps.get(i).task_offer_id + listOnGoingApps.get(i).usage_duration);
                                 }
                             } else if (listOnGoingApps.get(i).offer_type_id.equals(Constants.OFFER_TYPE_DAY)) {
                                 Calendar endCal = Calendar.getInstance();
                                 long lastTime = CommonUtils.formatDate(listOnGoingApps.get(i).last_completion_time).getTime();
                                 endCal.setTimeInMillis(lastTime);
-                                Logger.getInstance().e("GET DAY USAGE1", "GET DAY USAGE FROM: " + CommonUtils.getStringDateTime(lastTime) + " TO: "
-                                        + CommonUtils.getStringDateTime(currentTime) + " IS ANY TARGET COMPLETE: " + listOnGoingApps.get(i).is_any_target_completed);
-
                                 if (!CommonUtils.getStringDate(lastTime).equals(CommonUtils.getStringDate(currentTime)) || listOnGoingApps.get(i).is_any_target_completed == 0) {
                                     if (listOnGoingApps.get(i).is_any_target_completed == 1) {
                                         endCal.add(Calendar.DAY_OF_MONTH, 1);
@@ -194,18 +178,13 @@ public class SyncDataUtils {
                                         endCal.set(Calendar.MINUTE, 0);
                                         endCal.set(Calendar.SECOND, 0);
                                         endCal.set(Calendar.MILLISECOND, 0);
-                                        Logger.getInstance().e("GET DAY USAGE2", "GET DAY USAGE FROM: " + CommonUtils.getStringDateTime(endCal.getTimeInMillis()) + " TO: "
-                                                + CommonUtils.getStringDateTime(currentTime));
-
                                     }
                                     final List<UsageStats> stats = mUsageStatsManager.queryUsageStats(UsageStatsManager.INTERVAL_DAILY, endCal.getTimeInMillis(), currentTime);
                                     int dayCount = 0;
                                     if (stats != null) {
                                         for (int t = 0; t < stats.size(); t++) {
                                             final UsageStats pkgStats = stats.get(t);
-//                                            Logger.getInstance().e("GET DAY USAGE pkgStats.getPackageName()", "=== " + pkgStats.getPackageName() + " USAGE: " + pkgStats.getTotalTimeInForeground());
                                             if (pkgStats.getPackageName().equals(listOnGoingApps.get(i).package_id)) {
-                                                Logger.getInstance().e("GET USAGE DAY==>", "TotalTimeInForeground: " + pkgStats.getTotalTimeInForeground() + " === minDayUsage: " + minDayUsage + " === LastTimeUsed-usage: " + CommonUtils.getStringDateTime(pkgStats.getLastTimeUsed()) + " ===  endCal.getTimeInMillis(): " + CommonUtils.getStringDateTime(endCal.getTimeInMillis()) + " === getLastTimeUsed() > endCal.getTimeInMillis(): " + (pkgStats.getLastTimeUsed() > endCal.getTimeInMillis()));
                                                 if (((pkgStats.getTotalTimeInForeground() / 1000) / 60) >= minDayUsage && pkgStats.getLastTimeUsed() > endCal.getTimeInMillis()) {
                                                     dayCount++;
                                                 }
@@ -217,7 +196,6 @@ public class SyncDataUtils {
                                         isUpdateUsageData = true;
                                     }
                                 }
-                                Logger.getInstance().e("GET USAGE DAY==>", "OFFER ID: " + listOnGoingApps.get(i).task_offer_id + " === usage_duration: " + listOnGoingApps.get(i).usage_duration);
                             }
                         }
                     } catch (Exception e) {
@@ -225,9 +203,7 @@ public class SyncDataUtils {
                     }
                 }
 
-                Logger.getInstance().e("=============================", "=================SYNC USAGE isUpdateUsageData ====================" + isUpdateUsageData);
                 if (isUpdateUsageData) {
-                    Logger.getInstance().e("NOW SYNC USAGE STATUS ==>", listOnGoingApps.toString());
                     // NOW SEND ALL DATA TO SERVER
 //                    Gson gson = new Gson();
 //
@@ -264,8 +240,6 @@ public class SyncDataUtils {
                     int n = CommonUtils.getRandomNumberBetweenRange(1, 1000000);
                     jObject.put("RANDOM", n);
                     ApiInterface apiService = ApiClient.getClient().create(ApiInterface.class);
-                    Logger.getInstance().e("updatePlaytime ORIGINAL ==>", jObject.toString());
-                    Logger.getInstance().e("updatePlaytime ENCRYPTED ==>", cipher.bytesToHex(cipher.encrypt(jObject.toString())));
                     Call<ApiResponse> call = apiService.updatePlaytime(SharePrefs.getInstance(context).getString(SharePrefs.USER_ID), String.valueOf(n), cipher.bytesToHex(cipher.encrypt(jObject.toString())));
                     call.enqueue(new Callback<ApiResponse>() {
                         @Override
@@ -299,15 +273,12 @@ public class SyncDataUtils {
                                             responseModel.setOffers(list);
                                         }
 
-//                                        ResponseModel responseModel = new Gson().fromJson(new String(cipher.decrypt(response.body().getEncrypt())), ResponseModel.class);
-                                        Logger.getInstance().e("updatePlaytime ", "updatePlaytime RESPONSE: " + responseModel.toString());
                                         if (responseModel.getStatus().equals(Constants.STATUS_SUCCESS)) {
                                             try {
 
                                                 dao.deleteOnlyInstalledOffers();
                                                 if (responseModel.getOffers() != null && !responseModel.getOffers().isEmpty()) {
                                                     dao.insertAll(responseModel.getOffers());
-                                                    Logger.getInstance().e("SYNC UPDATED OFFERS ==>", "SYNC UPDATED OFFERS WITH LOCAL DB " + responseModel.getOffers());
                                                 }
                                             } catch (Exception e) {
                                                 e.printStackTrace();
@@ -362,7 +333,6 @@ public class SyncDataUtils {
         try {
             SharePrefs.getInstance(context).putBoolean(SharePrefs.IS_SYNC_IN_PROGRESS, false);
             if (dao.getAllPlaytimeOffers().isEmpty()) {
-                Logger.getInstance().e("ALL OFFERS COMPLETE STOP WORK MANAGER", "ALL OFFERS COMPLETE STOP WORK MANAGER -->");
                 AppTrackingSetup.stopTracking(context);
                 PlaytimeSDK.getInstance().stopTimer();
             }

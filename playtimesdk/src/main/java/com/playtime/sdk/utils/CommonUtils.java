@@ -38,7 +38,6 @@ public class CommonUtils {
     public static void showProgressLoader(Context activity) {
         try {
             if (dialogLoader == null || !dialogLoader.isShowing()) {
-                //AppLogger.getInstance().e("Activity Loader:", "=================LOADER===============" + activity);
                 dialogLoader = new Dialog(activity, android.R.style.Theme_Light);
                 dialogLoader.getWindow().setBackgroundDrawableResource(R.color.black_transparent);
                 dialogLoader.requestWindowFeature(Window.FEATURE_NO_TITLE);
@@ -265,7 +264,6 @@ public class CommonUtils {
     }
 
     public static void openUrlInChrome(Context c, String url) {
-        //AppLogger.getInstance().e("URL openUrlInChrome :============", url);
         if (!isStringNullOrEmpty(url)) {
             Uri uri = Uri.parse(url);
             Intent intent = new Intent(Intent.ACTION_VIEW, uri);
@@ -320,7 +318,6 @@ public class CommonUtils {
 
             public void onPageStarted(WebView webView, String str, Bitmap bitmap) {
                 super.onPageStarted(webView, str, bitmap);
-                //AppLogger.getInstance().e("finalUrl11--)", "" + finalUrl);
                 if (str.startsWith("market://") || str.startsWith("intent://") || str.startsWith("http://") || str.startsWith("https://")) {
                     finalUrl = str;
                 }

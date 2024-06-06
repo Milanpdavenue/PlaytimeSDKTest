@@ -5,7 +5,7 @@ extern "C" JNIEXPORT jstring JNICALL
 Java_com_playtime_sdk_PlaytimeSDK_getBaseUrl(
         JNIEnv *env,
         jobject /* this */) {
-    std::string hello = "https://appcampaign.in/playtime_sdk/api100/";
+    std::string hello = "https://appcampaign.in/playtime_sdk/api101/";
     return env->NewStringUTF(hello.c_str());
 }
 

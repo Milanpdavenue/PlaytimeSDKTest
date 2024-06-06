@@ -54,8 +54,6 @@ public class UpdateInstalledOfferStatusAsync {
             int n = CommonUtils.getRandomNumberBetweenRange(1, 1000000);
             jObject.put("RANDOM", n);
             ApiInterface apiService = ApiClient.getClient().create(ApiInterface.class);
-            Logger.getInstance().e("Offer Installed ORIGINAL ==>", jObject.toString());
-            Logger.getInstance().e("Offer Installed ENCRYPTED ==>", cipher.bytesToHex(cipher.encrypt(jObject.toString())));
             Call<ApiResponse> call = apiService.UpdateInstalledOfferStatusAsync(userId, String.valueOf(n), cipher.bytesToHex(cipher.encrypt(jObject.toString())));
             call.enqueue(new Callback<ApiResponse>() {
                 @Override
@@ -79,7 +77,6 @@ public class UpdateInstalledOfferStatusAsync {
         try {
             ResponseModel responseModel = new Gson().fromJson(new String(cipher.decrypt(response.getEncrypt())), ResponseModel.class);
             if (responseModel.getStatus().equals(Constants.STATUS_SUCCESS)) {
-                Logger.getInstance().e("INSTALL DATA UPDATED ==>", responseModel.toString());
                 objApp.is_installed = 1;
                 objApp.install_time = responseModel.getCurrentTime();
                 objApp.last_completion_time = responseModel.getCurrentTime();
@@ -88,8 +85,6 @@ public class UpdateInstalledOfferStatusAsync {
                     AppTrackingSetup.startAppTracking(activity);
                     PlaytimeSDK.getInstance().setTimer();
                 }
-            } else {
-                Logger.getInstance().e("INSTALL DATA NOT UPDATED ==>", responseModel.toString());
             }
         } catch (Exception e) {
             e.printStackTrace();

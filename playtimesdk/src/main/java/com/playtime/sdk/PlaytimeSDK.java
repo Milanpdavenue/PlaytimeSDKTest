@@ -108,7 +108,6 @@ public class PlaytimeSDK {
                                 public void onTick(long millisUntilFinished) {
                                     try {
                                         if (CommonUtils.isNetworkAvailable(context)) {
-                                            Logger.getInstance().e(" START SYNC FROM TIMER ==>", "START SYNC FROM TIMER");
                                             if (!SharePrefs.getInstance(context).getBoolean(SharePrefs.IS_SYNC_IN_PROGRESS)) {
                                                 new SyncDataUtils().syncData(context);
                                             }
@@ -285,8 +284,6 @@ public class PlaytimeSDK {
             jObject.put("DFG899", Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID));
             int n = CommonUtils.getRandomNumberBetweenRange(1, 1000000);
             jObject.put("RANDOM", n);
-            Logger.getInstance().e("verifyAppId ORIGINAL ==>", jObject.toString());
-            Logger.getInstance().e("verifyAppId ENCRYPTED ==>", cipher.bytesToHex(cipher.encrypt(jObject.toString())));
             Call<ApiResponse> call = apiService.verifyAppId(userId, String.valueOf(n), cipher.bytesToHex(cipher.encrypt(jObject.toString())));
             call.enqueue(new Callback<ApiResponse>() {
                 @Override
@@ -314,7 +311,6 @@ public class PlaytimeSDK {
         try {
             Encryption cipher = new Encryption();
             ResponseModel responseModel = new Gson().fromJson(new String(cipher.decrypt(apiResponse.getEncrypt())), ResponseModel.class);
-//            Logger.getInstance().e("verifyAppId responseModel: ", "responseModel: " + responseModel);
             if (responseModel.getStatus().equals(Constants.STATUS_SUCCESS)) {
                 defaultUrl = buildUrl(gaIdStr, appId, responseModel.getUuid());
                 SharePrefs.getInstance(context).putString(SharePrefs.APP_ID, appId);

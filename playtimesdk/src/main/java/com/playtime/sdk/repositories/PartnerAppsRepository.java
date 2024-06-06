@@ -38,7 +38,7 @@ public class PartnerAppsRepository {
 //                params[0].is_installed = 0;
             long result = mAsyncTaskDao.insert(params[0]);
             if (result > 0) {
-                Logger.getInstance().e("OFFER DATA", "OFFER DATA INSERTED");
+
             }
 //        }
             return null;
@@ -131,7 +131,6 @@ public class PartnerAppsRepository {
         @Override
         protected Void doInBackground(final PartnerApps... params) {
             mAsyncTaskDao.update(params[0]);
-            Logger.getInstance().e("INSTALL DATA UPDATED ==>", "INSTALL DATA UPDATED IN LOCAL DB");
             return null;
         }
     }
@@ -161,12 +160,8 @@ public class PartnerAppsRepository {
             gaid = params[3];
             userId = params[4];
             objApp = mAsyncTaskDao.getPartnerAppByPackageId(params[0]);
-            Logger.getInstance().e("CHECK PARTNER APP ==>", "IS PARTNER APP?: " + packageId + " OBJ: " + objApp);
             if (objApp != null && !CommonUtils.isStringNullOrEmpty(objApp.package_id) && objApp.package_id.equals(packageId)) {
-                Logger.getInstance().e("CHECK PARTNER APP ==>", "THIS IS PARTNER APP: " + packageId);
                 new UpdateInstalledOfferStatusAsync(context, packageId, appId, udid, gaid, objApp, userId, objApp.task_offer_id);
-            } else {
-                Logger.getInstance().e("CHECK PARTNER APP ==>", "THIS IS NOT A PARTNER APP: " + packageId);
             }
             return null;
         }

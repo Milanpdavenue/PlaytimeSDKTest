@@ -89,7 +89,6 @@ public class PlaytimeOfferWallActivity extends AppCompatActivity {
         if (CommonUtils.isNetworkAvailable(PlaytimeOfferWallActivity.this)) {
             applicationName = getIntent().getStringExtra("applicationName");
             urlPage = getIntent().getStringExtra("url");
-            Logger.getInstance().e("PlaytimeOfferWallActivity URL===", urlPage);
             webViewPage = findViewById(R.id.webviewPage);
             webViewPage.getSettings().setJavaScriptEnabled(true);
             webViewPage.getSettings().setCacheMode(WebSettings.LOAD_CACHE_ELSE_NETWORK);
@@ -175,9 +174,7 @@ public class PlaytimeOfferWallActivity extends AppCompatActivity {
                 public boolean onRenderProcessGone(WebView view, RenderProcessGoneDetail detail) {
                     try {
                         if (CommonUtils.isNetworkAvailable(PlaytimeOfferWallActivity.this)) {
-//                  AppLogger.getInstance().e("onRenderProcessGone Main", "===========" + view.getUrl());
                             if (webViewPage.canGoBack()) {
-                                //AppLogger.getInstance().e("BROWSER WINDOW : ", "page.canGoBack() : " + page.canGoBack());
                                 webViewPage.goBack();
                             }
                         } else {
@@ -220,15 +217,10 @@ public class PlaytimeOfferWallActivity extends AppCompatActivity {
         public void onOfferClicked(String offerId, String screenNo, String url, String offer_type, String offerDetails, String packageName) {
             try {
                 if (CommonUtils.isNetworkAvailable(PlaytimeOfferWallActivity.this)) {
-//                CommonUtils.setToast(PlaytimeOfferWallActivity.this, "Offer Clicked ScreenNo: " + screenNo + "== Url: " + url);
-                    Logger.getInstance().e("onOfferClicked: ", "onOfferClicked==screenNo: " + screenNo);
-                    Logger.getInstance().e("onOfferClicked: ", "onOfferClicked==url: " + url);
-                    Logger.getInstance().e("onOfferClicked: ", "packageName==packageName: " + packageName);
                     if (SystemClock.elapsedRealtime() - mLastClickTime < 1000) {
                         return;
                     }
                     mLastClickTime = SystemClock.elapsedRealtime();
-                    Logger.getInstance().e("offer_type: ", "offer_type: " + offer_type);
                     boolean shouldTrackUsage = offer_type.equals(Constants.OFFER_TYPE_PLAYTIME) || offer_type.equals(Constants.OFFER_TYPE_DAY);
                     if (!CommonUtils.isStringNullOrEmpty(offer_type) && shouldTrackUsage && !isUsageStatsPermissionGranted()) {
                         requestUsageStatsPermission();
@@ -240,7 +232,6 @@ public class PlaytimeOfferWallActivity extends AppCompatActivity {
                         // check if install receiver is setup
                         new PartnerAppsRepository(PlaytimeOfferWallActivity.this).insert(objPartnerApp);
                         // check if usage tracking manager is setup
-                        Logger.getInstance().e("objPartnerApp: ", "objPartnerApp: " + objPartnerApp);
                         if (objPartnerApp.offer_type_id.equals(Constants.OFFER_TYPE_PLAYTIME) || objPartnerApp.offer_type_id.equals(Constants.OFFER_TYPE_DAY)) {
                             AppTrackingSetup.startAppTracking(PlaytimeOfferWallActivity.this);
                             PlaytimeSDK.getInstance().setTimer();
@@ -304,7 +295,6 @@ public class PlaytimeOfferWallActivity extends AppCompatActivity {
                                     public void run() {
                                         if (CommonUtils.isNetworkAvailable(PlaytimeOfferWallActivity.this)) {
                                             String url1 = url + "&is_offer_installed=" + (CommonUtils.isPackageInstalled(PlaytimeOfferWallActivity.this, packageName) ? 1 : 0);
-                                            Logger.getInstance().e("URL", "URL: " + url1);
                                             webViewPage.loadUrl(url1);
                                         } else {
                                             CommonUtils.setToast(PlaytimeOfferWallActivity.this, "No internet connection");
@@ -443,7 +433,6 @@ public class PlaytimeOfferWallActivity extends AppCompatActivity {
             if (webViewPage.canGoBack() && !CommonUtils.isNetworkAvailable(PlaytimeOfferWallActivity.this)) {
                 CommonUtils.setToast(PlaytimeOfferWallActivity.this, "No internet connection");
             } else if (webViewPage.canGoBack()) {
-                //AppLogger.getInstance().e("BROWSER WINDOW : ", "page.canGoBack() : " + page.canGoBack());
                 webViewPage.goBack();
             } else {
                 if (doubleBackToExitPressedOnce) {
@@ -452,7 +441,6 @@ public class PlaytimeOfferWallActivity extends AppCompatActivity {
                 }
                 this.doubleBackToExitPressedOnce = true;
                 CommonUtils.setToast(PlaytimeOfferWallActivity.this, "Press BACK again to exit");
-
                 new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
                     @Override
                     public void run() {
@@ -476,11 +464,9 @@ public class PlaytimeOfferWallActivity extends AppCompatActivity {
                 PlaytimeSDK.packageInstallBroadcast = new BroadcastReceiver() {
                     @Override
                     public void onReceive(Context context, Intent intent) {
-                        Logger.getInstance().e(" PlaytimeSDK.packageInstallBroadcast INSTALL", "onReceive===" + intent.getAction());
                         if (!intent.getExtras().containsKey(Intent.EXTRA_REPLACING)) {
                             try {
                                 // EDIT-check if it is a partner app
-                                Logger.getInstance().e("InstallPackageReceiver", "NAME: " + intent.getData().toString().replace("package:", ""));
                                 new PartnerAppsRepository(PlaytimeOfferWallActivity.this).checkIsPartnerApp(intent.getData().toString().replace("package:", ""),
                                         SharePrefs.getInstance(PlaytimeOfferWallActivity.this).getString(SharePrefs.UDID),
                                         SharePrefs.getInstance(PlaytimeOfferWallActivity.this).getString(SharePrefs.APP_ID),
@@ -498,58 +484,20 @@ public class PlaytimeOfferWallActivity extends AppCompatActivity {
                 } else {
                     registerReceiver(PlaytimeSDK.packageInstallBroadcast, intentFilter);
                 }
-                Logger.getInstance().e("PackageInstallBroadCast onCreate=======", "REGISTER");
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-//    private void registerDeviceStatusBroadCast() {
-//        try {
-//            if (PlaytimeSDK.deviceStatusBroadcast == null) {
-//                IntentFilter intentFilter = new IntentFilter();
-//                intentFilter.addAction(Intent.ACTION_BOOT_COMPLETED);
-//                intentFilter.addAction(Intent.ACTION_DREAMING_STARTED);
-//                intentFilter.addAction(Intent.ACTION_DREAMING_STOPPED);
-//                intentFilter.addAction(Intent.ACTION_USER_PRESENT);
-//                PlaytimeSDK.deviceStatusBroadcast = new BroadcastReceiver() {
-//                    @Override
-//                    public void onReceive(Context context, Intent intent) {
-//                        try {
-//                            Logger.getInstance().e("DeviceStatusBroadCast", "NAME: " + intent.getAction());
-//                        } catch (Exception e) {
-//                            e.printStackTrace();
-//                        }
-//                    }
-//                };
-//                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-//                    registerReceiver(PlaytimeSDK.deviceStatusBroadcast, intentFilter, RECEIVER_EXPORTED);
-//                } else {
-//                    registerReceiver(PlaytimeSDK.deviceStatusBroadcast, intentFilter);
-//                }
-//                Logger.getInstance().e("DeviceStatusBroadCast onCreate=======", "REGISTER");
-//            }
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
-//    }
-
     private void unregisterReceiver() {
         try {
             if (PlaytimeSDK.packageInstallBroadcast != null) {
                 unregisterReceiver(PlaytimeSDK.packageInstallBroadcast);
                 PlaytimeSDK.packageInstallBroadcast = null;
-                Logger.getInstance().e("packageInstallBroadcast onDestroy=======", "UNREGISTER");
             }
-//            if (PlaytimeSDK.deviceStatusBroadcast != null) {
-//                unregisterReceiver(PlaytimeSDK.deviceStatusBroadcast);
-//                PlaytimeSDK.deviceStatusBroadcast = null;
-//                Logger.getInstance().e("DeviceStatusBroadCast onDestroy=======", "UNREGISTER");
-//            }
         } catch (Exception e) {
             PlaytimeSDK.packageInstallBroadcast = null;
-//            PlaytimeSDK.deviceStatusBroadcast = null;
             e.printStackTrace();
         }
     }
