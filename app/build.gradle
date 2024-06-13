@@ -46,7 +46,7 @@ dependencies {
     annotationProcessor "androidx.lifecycle:lifecycle-compiler:$lifecycle_version"
 
   implementation project(':playtimesdk')
-//    implementation files('libs/playtimesdk-release.aar')
+//    implementation files('libs/playtimesdk-release_on.aar')
 //  implementation files('libs/playtimesdk-debug.aar')
 
     implementation platform('com.google.firebase:firebase-bom:29.3.1')

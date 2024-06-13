@@ -17,6 +17,7 @@
         android:layout_marginStart="@dimen/dim_5"
         android:layout_marginTop="@dimen/dim_10"
         android:scaleType="fitCenter"
+        android:src="@mipmap/ic_launcher"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -65,12 +66,12 @@
             android:layout_height="@dimen/dim_40"
             android:layout_marginEnd="@dimen/dim_5"
             android:src="@drawable/buttontoggle"
-            app:layout_constraintBottom_toBottomOf="@+id/textView"
+            app:layout_constraintBottom_toBottomOf="@+id/tvMessage"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="@id/tv1" />
 
         <TextView
-            android:id="@+id/textView"
+            android:id="@+id/tvMessage"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/dim_3"

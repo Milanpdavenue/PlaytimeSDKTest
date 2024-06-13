@@ -51,27 +51,27 @@
                     android:textSize="@dimen/textSize_13" />
             </LinearLayout>
 
-            <include layout="@layout/item_shimmer_row" />
+            <include layout="@layout/item_playtimeads_shimmer_row" />
 
-            <include layout="@layout/item_shimmer_row" />
+            <include layout="@layout/item_playtimeads_shimmer_row" />
 
-            <include layout="@layout/item_shimmer_row" />
+            <include layout="@layout/item_playtimeads_shimmer_row" />
 
-            <include layout="@layout/item_shimmer_row" />
+            <include layout="@layout/item_playtimeads_shimmer_row" />
 
-            <include layout="@layout/item_shimmer_row" />
+            <include layout="@layout/item_playtimeads_shimmer_row" />
 
-            <include layout="@layout/item_shimmer_row" />
+            <include layout="@layout/item_playtimeads_shimmer_row" />
 
-            <include layout="@layout/item_shimmer_row" />
+            <include layout="@layout/item_playtimeads_shimmer_row" />
 
-            <include layout="@layout/item_shimmer_row" />
+            <include layout="@layout/item_playtimeads_shimmer_row" />
 
-            <include layout="@layout/item_shimmer_row" />
+            <include layout="@layout/item_playtimeads_shimmer_row" />
 
-            <include layout="@layout/item_shimmer_row" />
+            <include layout="@layout/item_playtimeads_shimmer_row" />
 
-            <include layout="@layout/item_shimmer_row" />
+            <include layout="@layout/item_playtimeads_shimmer_row" />
 
         </LinearLayout>
 

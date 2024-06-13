@@ -29,7 +29,7 @@ public class ApplicationController extends Application {
         ProcessLifecycleOwner.get().getLifecycle().addObserver(activityManager);
     }
 
-    public void initPlaytimeSDK() {
+    public void initPlaytimeSDK(Context mContext) {
         String userID = "1";
         String applicationKey = "635481e03a09fed8";
         PlaytimeSDK.getInstance().init(mContext, applicationKey, userID, new OfferWallInitListener() {

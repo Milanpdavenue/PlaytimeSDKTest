@@ -14,6 +14,7 @@ public class SharePrefs {
     public static String UDID = "UUID";
     public static String FCM_TOKEN = "FCM_TOKEN";
     public static String IS_SYNC_IN_PROGRESS = "IS_SYNC_IN_PROGRESS";
+    public static String TIMER_SYNC_ATTEMPT = "TIMER_SYNC_ATTEMPT";
     public static String IS_CONSENT_GIVEN = "IS_CONSENT_GIVEN";
     public static String CONSENT_TITLE = "CONSENT_TITLE";
     public static String CONSENT_MESSAGE = "CONSENT_MESSAGE";
@@ -44,5 +45,13 @@ public class SharePrefs {
 
     public boolean getBoolean(String key) {
         return pref.getBoolean(key, false);
+    }
+
+    public void putInt(String key, int val) {
+        pref.edit().putInt(key, val).apply();
+    }
+
+    public int getInt(String key) {
+        return pref.getInt(key, 0);
     }
 }

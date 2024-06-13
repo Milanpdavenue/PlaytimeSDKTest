@@ -31,6 +31,12 @@ public class ResponseModel {
     private String consentTitle;
     @Expose
     private String consentMessage;
+    @Expose
+    private int onGoingOfferCount;
+
+    public int getOnGoingOfferCount() {
+        return onGoingOfferCount;
+    }
 
     public String getMessageHTML() {
         return messageHTML;
@@ -89,6 +95,20 @@ public class ResponseModel {
 
     @Override
     public String toString() {
-        return "ResponseModel{" + "message='" + message + '\'' + ", status='" + status + '\'' + ", points='" + points + '\'' + ", uuid='" + uuid + '\'' + ", earningPoint='" + earningPoint + '\'' + ", currentTime='" + currentTime + '\'' + ", minDayUsage='" + minDayUsage + '\'' + ", minPlaytimeUsage='" + minPlaytimeUsage + '\'' + ", offers=" + offers + '}';
+        return "ResponseModel{" +
+                "message='" + message + '\'' +
+                ", messageHTML='" + messageHTML + '\'' +
+                ", status='" + status + '\'' +
+                ", points='" + points + '\'' +
+                ", uuid='" + uuid + '\'' +
+                ", earningPoint='" + earningPoint + '\'' +
+                ", currentTime='" + currentTime + '\'' +
+                ", minDayUsage='" + minDayUsage + '\'' +
+                ", minPlaytimeUsage='" + minPlaytimeUsage + '\'' +
+                ", consentTitle='" + consentTitle + '\'' +
+                ", consentMessage='" + consentMessage + '\'' +
+                ", onGoingOfferCount=" + onGoingOfferCount +
+                ", offers=" + offers +
+                '}';
     }
 }

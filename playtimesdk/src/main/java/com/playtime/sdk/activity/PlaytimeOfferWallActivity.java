@@ -1,28 +1,19 @@
 package com.playtime.sdk.activity;
 
-import static android.app.AppOpsManager.OPSTR_GET_USAGE_STATS;
-
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
-import android.app.AppOpsManager;
-import android.app.Dialog;
-import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageManager;
-import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.SystemClock;
-import android.provider.Settings;
 import android.view.View;
-import android.view.WindowManager;
+import android.webkit.CookieManager;
 import android.webkit.HttpAuthHandler;
 import android.webkit.JavascriptInterface;
 import android.webkit.RenderProcessGoneDetail;
@@ -30,15 +21,11 @@ import android.webkit.WebResourceRequest;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
-import android.widget.Button;
-import android.widget.ImageView;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.AppCompatButton;
 import androidx.browser.customtabs.CustomTabsIntent;
 
 import com.facebook.shimmer.ShimmerFrameLayout;
@@ -61,12 +48,10 @@ import java.util.Calendar;
 public class PlaytimeOfferWallActivity extends AppCompatActivity {
     private WebView webViewPage;
     private String urlPage;
-    private String applicationName;
-    private Dialog dialog;
-    private Drawable appIconBitmap;
     private static long mLastClickTime = 0;
     private boolean isFirstTime = true;
     private ShimmerFrameLayout shimmerLayout;
+    private String applicationName;
 
     public PlaytimeOfferWallActivity() {
     }
@@ -79,7 +64,7 @@ public class PlaytimeOfferWallActivity extends AppCompatActivity {
         if (actionBar != null) {
             actionBar.hide();
         }
-        setContentView(R.layout.activity_playtime_offerwall);
+        setContentView(R.layout.activity_playtimeads_offerwall);
 
         setViews();
     }
@@ -222,8 +207,8 @@ public class PlaytimeOfferWallActivity extends AppCompatActivity {
                     }
                     mLastClickTime = SystemClock.elapsedRealtime();
                     boolean shouldTrackUsage = offer_type.equals(Constants.OFFER_TYPE_PLAYTIME) || offer_type.equals(Constants.OFFER_TYPE_DAY);
-                    if (!CommonUtils.isStringNullOrEmpty(offer_type) && shouldTrackUsage && !isUsageStatsPermissionGranted()) {
-                        requestUsageStatsPermission();
+                    if (!CommonUtils.isStringNullOrEmpty(offer_type) && shouldTrackUsage && !CommonUtils.isUsageStatsPermissionGranted(PlaytimeOfferWallActivity.this)) {
+                        CommonUtils.requestUsageStatsPermission(PlaytimeOfferWallActivity.this, applicationName,"To track this offer you need to give Usage Access Permission. Kindly go to settings screen and turn on toggle button to allow this permission.");
                         return;
                     }
                     if (!CommonUtils.isStringNullOrEmpty(offerDetails)) {
@@ -295,6 +280,7 @@ public class PlaytimeOfferWallActivity extends AppCompatActivity {
                                     public void run() {
                                         if (CommonUtils.isNetworkAvailable(PlaytimeOfferWallActivity.this)) {
                                             String url1 = url + "&is_offer_installed=" + (CommonUtils.isPackageInstalled(PlaytimeOfferWallActivity.this, packageName) ? 1 : 0);
+                                            Logger.getInstance().e("DETAILS URL:","===DETAILS URL===="+url1+" package : "+packageName);
                                             webViewPage.loadUrl(url1);
                                         } else {
                                             CommonUtils.setToast(PlaytimeOfferWallActivity.this, "No internet connection");
@@ -352,75 +338,6 @@ public class PlaytimeOfferWallActivity extends AppCompatActivity {
         return objPartnerApp;
     }
 
-    private boolean isUsageStatsPermissionGranted() {
-        AppOpsManager appOps = (AppOpsManager) getSystemService(Context.APP_OPS_SERVICE);
-        int mode = appOps.checkOpNoThrow(OPSTR_GET_USAGE_STATS, android.os.Process.myUid(), getPackageName());
-        boolean granted;
-        if (mode == AppOpsManager.MODE_DEFAULT) {
-            granted = (checkCallingOrSelfPermission(android.Manifest.permission.PACKAGE_USAGE_STATS) == PackageManager.PERMISSION_GRANTED);
-        } else {
-            granted = (mode == AppOpsManager.MODE_ALLOWED);
-        }
-        return granted;
-    }
-
-    private void requestUsageStatsPermission() {
-        PackageManager packageManager = getPackageManager();
-        String packageName = getPackageName();
-
-        try {
-            ApplicationInfo applicationInfo = packageManager.getApplicationInfo(packageName, 0);
-            applicationName = packageManager.getApplicationLabel(applicationInfo).toString();
-            appIconBitmap = packageManager.getApplicationIcon(applicationInfo);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        if (dialog == null) {
-            dialog = new Dialog(this, android.R.style.Theme_Light);
-            dialog.getWindow().addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
-            dialog.setCancelable(true);
-            dialog.setContentView(R.layout.permission_layout);
-            dialog.getWindow().setBackgroundDrawableResource(R.color.black_transparent);
-            Button ok = dialog.findViewById(R.id.btnok);
-            AppCompatButton dialogBtn_cancel = dialog.findViewById(R.id.btncancel);
-            TextView tvApplicationName = dialog.findViewById(R.id.tv_applicationName);
-            ImageView ivApplicationIcon = dialog.findViewById(R.id.iv_applicationIcon);
-            tvApplicationName.setText(applicationName);
-            ivApplicationIcon.setImageDrawable(appIconBitmap);
-            ok.setOnClickListener(new View.OnClickListener() {
-                public void onClick(View v) {
-                    try {
-                        Intent intent = new Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS);
-                        intent.setData(Uri.parse("package:" + getPackageName()));
-                        startActivity(intent);
-                        dialog.dismiss();
-                    } catch (ActivityNotFoundException var4) {
-                        try {
-                            Intent intentx = new Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS);
-                            startActivity(intentx);
-                            dialog.dismiss();
-                        } catch (Exception e) {
-                            CommonUtils.setToast(PlaytimeOfferWallActivity.this, "Not able to open settings screen");
-                        }
-                    }
-
-                }
-            });
-            dialogBtn_cancel.setOnClickListener(new View.OnClickListener() {
-                public void onClick(View v) {
-                    dialog.dismiss();
-                }
-            });
-        }
-        dialog.show();
-    }
-
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == 1 && !isUsageStatsPermissionGranted()) {
-        }
-        super.onActivityResult(requestCode, resultCode, data);
-    }
-
     protected void onResume() {
         super.onResume();
     }
@@ -436,6 +353,8 @@ public class PlaytimeOfferWallActivity extends AppCompatActivity {
                 webViewPage.goBack();
             } else {
                 if (doubleBackToExitPressedOnce) {
+                    CookieManager cookieManager = CookieManager.getInstance();
+                    cookieManager.removeAllCookie();
                     super.onBackPressed();
                     return;
                 }

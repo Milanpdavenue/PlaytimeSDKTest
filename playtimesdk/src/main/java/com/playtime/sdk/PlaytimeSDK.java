@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.CountDownTimer;
@@ -108,8 +109,14 @@ public class PlaytimeSDK {
                                 public void onTick(long millisUntilFinished) {
                                     try {
                                         if (CommonUtils.isNetworkAvailable(context)) {
+                                            Logger.getInstance().e(" START SYNC FROM TIMER ==>", "START SYNC FROM TIMER");
                                             if (!SharePrefs.getInstance(context).getBoolean(SharePrefs.IS_SYNC_IN_PROGRESS)) {
                                                 new SyncDataUtils().syncData(context);
+                                            } else {
+                                                SharePrefs.getInstance(context).putInt(SharePrefs.TIMER_SYNC_ATTEMPT, SharePrefs.getInstance(context).getInt(SharePrefs.TIMER_SYNC_ATTEMPT) + 1);
+                                                if (SharePrefs.getInstance(context).getInt(SharePrefs.TIMER_SYNC_ATTEMPT) > 3) {
+                                                    SharePrefs.getInstance(context).putBoolean(SharePrefs.IS_SYNC_IN_PROGRESS, false);
+                                                }
                                             }
                                         }
                                     } catch (Exception e) {
@@ -284,6 +291,8 @@ public class PlaytimeSDK {
             jObject.put("DFG899", Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID));
             int n = CommonUtils.getRandomNumberBetweenRange(1, 1000000);
             jObject.put("RANDOM", n);
+            Logger.getInstance().e("verifyAppId ORIGINAL ==>", jObject.toString());
+            Logger.getInstance().e("verifyAppId ENCRYPTED ==>", cipher.bytesToHex(cipher.encrypt(jObject.toString())));
             Call<ApiResponse> call = apiService.verifyAppId(userId, String.valueOf(n), cipher.bytesToHex(cipher.encrypt(jObject.toString())));
             call.enqueue(new Callback<ApiResponse>() {
                 @Override
@@ -311,6 +320,7 @@ public class PlaytimeSDK {
         try {
             Encryption cipher = new Encryption();
             ResponseModel responseModel = new Gson().fromJson(new String(cipher.decrypt(apiResponse.getEncrypt())), ResponseModel.class);
+            Logger.getInstance().e("verifyAppId responseModel: ", "responseModel: " + responseModel);
             if (responseModel.getStatus().equals(Constants.STATUS_SUCCESS)) {
                 defaultUrl = buildUrl(gaIdStr, appId, responseModel.getUuid());
                 SharePrefs.getInstance(context).putString(SharePrefs.APP_ID, appId);
@@ -323,6 +333,13 @@ public class PlaytimeSDK {
                 isInitialized = true;
                 if (listener != null) {
                     listener.onInitSuccess();
+                }
+                if (responseModel.getOnGoingOfferCount() > 0 && !CommonUtils.isUsageStatsPermissionGranted(context)) {
+                    CommonUtils.requestUsageStatsPermission(context,  context.getPackageName(),"To track playtime offers you need to give Usage Access Permission. Kindly go to settings screen and turn on toggle button to allow this permission.");
+                }
+                if (timer == null && responseModel.getOnGoingOfferCount() > 0) {
+                    AppTrackingSetup.startAppTracking(context);
+                    setTimer();
                 }
             } else if (responseModel.getStatus().equals(Constants.STATUS_MAINTENANCE)) {
                 if (context instanceof Activity) {

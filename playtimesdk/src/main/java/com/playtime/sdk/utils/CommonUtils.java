@@ -1,17 +1,26 @@
 package com.playtime.sdk.utils;
 
+import static android.app.AppOpsManager.OPSTR_GET_USAGE_STATS;
+
 import android.app.Activity;
+import android.app.ActivityManager;
+import android.app.AppOpsManager;
 import android.app.Dialog;
+import android.app.usage.UsageStats;
+import android.app.usage.UsageStatsManager;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.drawable.Drawable;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Handler;
+import android.provider.Settings;
 import android.text.Html;
 import android.text.method.LinkMovementMethod;
 import android.view.Gravity;
@@ -21,16 +30,22 @@ import android.view.WindowManager;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.appcompat.widget.AppCompatButton;
+
 import com.playtime.sdk.R;
-import com.playtime.sdk.activity.PlaytimeOfferWallActivity;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 import java.util.Random;
+import java.util.SortedMap;
+import java.util.TreeMap;
+import java.util.concurrent.TimeUnit;
 
 public class CommonUtils {
     private static Dialog dialogLoader;
@@ -44,7 +59,7 @@ public class CommonUtils {
                 dialogLoader.getWindow().addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
                 dialogLoader.setCancelable(true);
                 dialogLoader.setCanceledOnTouchOutside(true);
-                dialogLoader.setContentView(R.layout.popup_progressbar);
+                dialogLoader.setContentView(R.layout.dialog_playtimeads_progressbar);
                 dialogLoader.show();
             }
         } catch (Exception e) {
@@ -129,7 +144,7 @@ public class CommonUtils {
                 dialog1.getWindow().setBackgroundDrawableResource(R.color.black_transparent);
                 dialog1.requestWindowFeature(Window.FEATURE_NO_TITLE);
                 dialog1.getWindow().addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
-                dialog1.setContentView(R.layout.dialog_terms);
+                dialog1.setContentView(R.layout.dialog_playtimeads_terms);
                 dialog1.setCancelable(false);
 
                 Button btnOk = dialog1.findViewById(R.id.btnOk);
@@ -164,7 +179,7 @@ public class CommonUtils {
                 dialog1.getWindow().setBackgroundDrawableResource(R.color.black_transparent);
                 dialog1.requestWindowFeature(Window.FEATURE_NO_TITLE);
                 dialog1.getWindow().addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
-                dialog1.setContentView(R.layout.popup_notify);
+                dialog1.setContentView(R.layout.dialog_playtimeads_notify_);
                 dialog1.setCancelable(false);
 
                 Button btnOk = dialog1.findViewById(R.id.btnOk);
@@ -193,14 +208,14 @@ public class CommonUtils {
         }
     }
 
-    public static void showPopup(Context activity,String message) {
+    public static void showPopup(Context activity, String message) {
         try {
             if (activity != null) {
                 final Dialog dialog1 = new Dialog(activity, android.R.style.Theme_Light);
                 dialog1.getWindow().setBackgroundDrawableResource(R.color.black_transparent);
                 dialog1.requestWindowFeature(Window.FEATURE_NO_TITLE);
                 dialog1.getWindow().addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
-                dialog1.setContentView(R.layout.popup_notify);
+                dialog1.setContentView(R.layout.dialog_playtimeads_notify_);
                 dialog1.setCancelable(false);
 
                 Button btnOk = dialog1.findViewById(R.id.btnOk);
@@ -298,7 +313,7 @@ public class CommonUtils {
         dialogLoaderOffer.getWindow().addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
         dialogLoaderOffer.setCancelable(true);
         dialogLoaderOffer.setCanceledOnTouchOutside(true);
-        dialogLoaderOffer.setContentView(R.layout.popup_progressbar);
+        dialogLoaderOffer.setContentView(R.layout.dialog_playtimeads_progressbar);
 
         webLoader = dialogLoaderOffer.findViewById(R.id.webloader);
 
@@ -462,5 +477,109 @@ public class CommonUtils {
             context.startActivity(new Intent(Intent.ACTION_VIEW,
                     Uri.parse("http://play.google.com/store/apps/details?id=" + appPackage)).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_NO_ANIMATION));
         }
+    }
+
+    public static boolean isUsageStatsPermissionGranted(Context context) {
+        AppOpsManager appOps = (AppOpsManager) context.getSystemService(Context.APP_OPS_SERVICE);
+        int mode = appOps.checkOpNoThrow(OPSTR_GET_USAGE_STATS, android.os.Process.myUid(), context.getPackageName());
+        boolean granted;
+        if (mode == AppOpsManager.MODE_DEFAULT) {
+            granted = (context.checkCallingOrSelfPermission(android.Manifest.permission.PACKAGE_USAGE_STATS) == PackageManager.PERMISSION_GRANTED);
+        } else {
+            granted = (mode == AppOpsManager.MODE_ALLOWED);
+        }
+        return granted;
+    }
+
+    private static Dialog dialog;
+
+    public static void requestUsageStatsPermission(Context context, String applicationName,String message) {
+        PackageManager packageManager = context.getPackageManager();
+        String packageName = context.getPackageName();
+        Drawable appIconBitmap = null;
+        try {
+            ApplicationInfo applicationInfo = packageManager.getApplicationInfo(packageName, 0);
+            applicationName = packageManager.getApplicationLabel(applicationInfo).toString();
+            appIconBitmap = packageManager.getApplicationIcon(applicationInfo);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        if (dialog == null) {
+            dialog = new Dialog(context, android.R.style.Theme_Light);
+            dialog.getWindow().addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+            dialog.setCancelable(true);
+            dialog.setContentView(R.layout.layout_playtimeads_permission);
+            dialog.getWindow().setBackgroundDrawableResource(R.color.black_transparent);
+            Button ok = dialog.findViewById(R.id.btnok);
+            AppCompatButton dialogBtn_cancel = dialog.findViewById(R.id.btncancel);
+            TextView tvApplicationName = dialog.findViewById(R.id.tv_applicationName);
+            TextView tvMessage = dialog.findViewById(R.id.tvMessage);
+            tvMessage.setText(message);
+            ImageView ivApplicationIcon = dialog.findViewById(R.id.iv_applicationIcon);
+            tvApplicationName.setText(applicationName);
+            if (appIconBitmap != null) {
+                ivApplicationIcon.setImageDrawable(appIconBitmap);
+            }
+            ok.setOnClickListener(new View.OnClickListener() {
+                public void onClick(View v) {
+                    try {
+                        Intent intent = new Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS);
+                        intent.setData(Uri.parse("package:" + context.getPackageName()));
+                        if (context instanceof Activity) {
+                            context.startActivity(intent);
+                        } else {
+                            CommonUtils.setToast(context, "Please allow app usage permission");
+                        }
+                        dialog.dismiss();
+                    } catch (ActivityNotFoundException var4) {
+                        try {
+                            Intent intentx = new Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS);
+                            if (context instanceof Activity) {
+                                context.startActivity(intentx);
+                            } else {
+                                CommonUtils.setToast(context, "Please allow app usage permission");
+                            }
+                            dialog.dismiss();
+                        } catch (Exception e) {
+                            CommonUtils.setToast(context, "Not able to open settings screen");
+                        }
+                    }
+                }
+            });
+            dialogBtn_cancel.setOnClickListener(new View.OnClickListener() {
+                public void onClick(View v) {
+                    dialog.dismiss();
+                }
+            });
+        }
+        dialog.show();
+    }
+
+    public static String getTopPackageName(Context context) {
+
+        String topPackageName = "";
+        ActivityManager mActivityManager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
+        try {
+            UsageStatsManager mUsageStatsManager = (UsageStatsManager) context.getSystemService(Context.USAGE_STATS_SERVICE);
+            List<UsageStats> stats =
+                    mUsageStatsManager.queryUsageStats(
+                            UsageStatsManager.INTERVAL_DAILY,
+                            System.currentTimeMillis() - TimeUnit.DAYS.toMillis(1),
+                            System.currentTimeMillis() + TimeUnit.DAYS.toMillis(1));
+            if (stats != null) {
+                SortedMap<Long, UsageStats> mySortedMap = new TreeMap<>();
+                for (UsageStats usageStats : stats) {
+                    mySortedMap.put(usageStats.getLastTimeUsed(), usageStats);
+                }
+                if (!mySortedMap.isEmpty()) {
+                    topPackageName = mySortedMap.get(mySortedMap.lastKey()).getPackageName();
+                }
+            } else {
+                topPackageName = mActivityManager.getRunningAppProcesses().get(0).processName;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return topPackageName;
     }
 }
