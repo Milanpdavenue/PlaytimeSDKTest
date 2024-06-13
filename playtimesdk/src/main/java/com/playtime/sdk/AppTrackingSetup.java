@@ -3,7 +3,6 @@ package com.playtime.sdk;
 import static com.playtime.sdk.utils.Constants.CHECK_USAGE_STATUS_WORKER;
 
 import android.content.Context;
-import com.playtime.sdk.utils.Logger;
 
 import androidx.work.Constraints;
 import androidx.work.ExistingPeriodicWorkPolicy;
@@ -13,6 +12,8 @@ import androidx.work.WorkInfo;
 import androidx.work.WorkManager;
 
 import com.google.common.util.concurrent.ListenableFuture;
+import com.playtime.sdk.utils.Logger;
+import com.playtime.sdk.utils.SharePrefs;
 
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -20,15 +21,15 @@ import java.util.concurrent.TimeUnit;
 
 public class AppTrackingSetup {
     public static void startAppTracking(Context context) {
-        if (!isWorkScheduled(context, CHECK_USAGE_STATUS_WORKER)) { // check if your CHECK_USAGE_STATUS_WORKER is not already scheduled
-            schedulePeriodicWork(context, CHECK_USAGE_STATUS_WORKER); // schedule your work
+        if (!isWorkScheduled(context, CHECK_USAGE_STATUS_WORKER + "_" + SharePrefs.getInstance(context).getString(SharePrefs.APP_ID))) { // check if your CHECK_USAGE_STATUS_WORKER is not already scheduled
+            schedulePeriodicWork(context, CHECK_USAGE_STATUS_WORKER + "_" + SharePrefs.getInstance(context).getString(SharePrefs.APP_ID)); // schedule your work
         }
     }
 
     public static void stopTracking(Context context) {
         try {
-            Logger.getInstance().e("STOP WORK MANAGER","STOP WORK MANAGER=== stopTracking");
-            WorkManager.getInstance(context).cancelAllWorkByTag(CHECK_USAGE_STATUS_WORKER);
+            Logger.getInstance().e("STOP WORK MANAGER", "STOP WORK MANAGER=== stopTracking " + CHECK_USAGE_STATUS_WORKER + "_" + SharePrefs.getInstance(context).getString(SharePrefs.APP_ID));
+            WorkManager.getInstance(context).cancelAllWorkByTag(CHECK_USAGE_STATUS_WORKER + "_" + SharePrefs.getInstance(context).getString(SharePrefs.APP_ID));
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -43,7 +44,7 @@ public class AppTrackingSetup {
         PeriodicWorkRequest photoCheckWork = photoCheckBuilder.build();
         WorkManager instance = WorkManager.getInstance(context);
         instance.enqueueUniquePeriodicWork(tag, ExistingPeriodicWorkPolicy.KEEP, photoCheckWork);
-        Logger.getInstance().e("PLAYTIME SDK schedulePeriodicWork","schedulePeriodicWork=== Worker is scheduled");
+        Logger.getInstance().e("PLAYTIME SDK schedulePeriodicWork", "schedulePeriodicWork=== Worker is scheduled :" + CHECK_USAGE_STATUS_WORKER + "_" + SharePrefs.getInstance(context).getString(SharePrefs.APP_ID));
     }
 
     private static boolean isWorkScheduled(Context context, String tag) {
@@ -55,7 +56,7 @@ public class AppTrackingSetup {
             for (WorkInfo workInfo : workInfoList) {
                 WorkInfo.State state = workInfo.getState();
                 running = state == WorkInfo.State.RUNNING | state == WorkInfo.State.ENQUEUED;
-                Logger.getInstance().e("PLAYTIME SDK isWorkScheduled","isWorkScheduled=== "+tag+" Worker is already scheduled");
+                Logger.getInstance().e("PLAYTIME SDK isWorkScheduled", "isWorkScheduled=== " + tag + " Worker is already scheduled");
             }
             return running;
         } catch (ExecutionException e) {
