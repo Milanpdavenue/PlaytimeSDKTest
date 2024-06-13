@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.CountDownTimer;
@@ -335,7 +334,7 @@ public class PlaytimeSDK {
                     listener.onInitSuccess();
                 }
                 if (responseModel.getOnGoingOfferCount() > 0 && !CommonUtils.isUsageStatsPermissionGranted(context)) {
-                    CommonUtils.requestUsageStatsPermission(context,  context.getPackageName(),"To track playtime offers you need to give Usage Access Permission. Kindly go to settings screen and turn on toggle button to allow this permission.");
+                    CommonUtils.requestUsageStatsPermission(context, context.getPackageName(), "To track playtime offers you need to give Usage Access Permission. Kindly go to settings screen and turn on toggle button to allow this permission.");
                 }
                 if (timer == null && responseModel.getOnGoingOfferCount() > 0) {
                     AppTrackingSetup.startAppTracking(context);
