@@ -8,12 +8,12 @@ public class Logger {
     private static Logger instance = new Logger();
     private boolean isLogEnabled = false;
 
-//    private Logger() {
-//        isLogEnabled = BuildConfig.DEBUG;
-//    }
     private Logger() {
-        isLogEnabled = true;
+        isLogEnabled = BuildConfig.DEBUG;
     }
+//    private Logger() {
+//        isLogEnabled = true;
+//    }
 
     public static Logger getInstance() {
         return instance;

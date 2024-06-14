@@ -3,12 +3,13 @@ package com.playtime.sdk.repositories;
 import android.content.Context;
 import android.os.AsyncTask;
 
+import com.playtime.sdk.AppTrackingSetup;
+import com.playtime.sdk.PlaytimeSDK;
 import com.playtime.sdk.async.UpdateInstalledOfferStatusAsync;
 import com.playtime.sdk.database.AppDatabase;
 import com.playtime.sdk.database.PartnerApps;
 import com.playtime.sdk.database.PartnerAppsDao;
 import com.playtime.sdk.utils.CommonUtils;
-import com.playtime.sdk.utils.Logger;
 
 import java.util.List;
 
@@ -164,6 +165,39 @@ public class PartnerAppsRepository {
                 new UpdateInstalledOfferStatusAsync(context, packageId, appId, udid, gaid, objApp, userId, objApp.task_offer_id);
             }
             return null;
+        }
+    }
+
+    public void startTracking(Context context) {
+        try {
+            new StartTrackingAsync(context).execute();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private class StartTrackingAsync extends AsyncTask<Void, Void, Void> {
+        private final Context context;
+
+        StartTrackingAsync(Context context) {
+            this.context = context;
+        }
+
+        protected Void doInBackground(Void... voids) {
+            try {
+                if (!AppDatabase.getInstance(context).partnerAppsDao().getAllPlaytimeOffers().isEmpty()) {
+                    AppTrackingSetup.startAppTracking(context);
+                    PlaytimeSDK.getInstance().setTimer();
+                } else {
+                    AppTrackingSetup.stopTracking(context);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            return null;
+        }
+
+        protected void onPostExecute() {
         }
     }
 }

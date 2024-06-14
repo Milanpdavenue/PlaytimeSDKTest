@@ -37,6 +37,7 @@ import android.widget.Toast;
 import androidx.appcompat.widget.AppCompatButton;
 
 import com.playtime.sdk.R;
+import com.playtime.sdk.activity.PlaytimeOfferWallActivity;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -159,6 +160,9 @@ public class CommonUtils {
 
                 btnOk.setOnClickListener(v -> {
                     SharePrefs.getInstance(activity).putBoolean(SharePrefs.IS_CONSENT_GIVEN, true);
+                    if (activity instanceof PlaytimeOfferWallActivity) {
+                        ((PlaytimeOfferWallActivity) activity).askUsagePermissionAndResumePlaytimeUsage();
+                    }
                     dialog1.dismiss();
                 });
                 btnCancel.setOnClickListener(v -> {
@@ -493,7 +497,7 @@ public class CommonUtils {
 
     private static Dialog dialog;
 
-    public static void requestUsageStatsPermission(Context context, String applicationName,String message) {
+    public static void requestUsageStatsPermission(Context context, String applicationName, String message) {
         PackageManager packageManager = context.getPackageManager();
         String packageName = context.getPackageName();
         Drawable appIconBitmap = null;

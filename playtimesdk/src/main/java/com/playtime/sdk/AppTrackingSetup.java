@@ -28,7 +28,7 @@ public class AppTrackingSetup {
 
     public static void stopTracking(Context context) {
         try {
-            Logger.getInstance().e("STOP WORK MANAGER", "STOP WORK MANAGER=== stopTracking " + CHECK_USAGE_STATUS_WORKER + "_" + SharePrefs.getInstance(context).getString(SharePrefs.APP_ID));
+//            Logger.getInstance().e("STOP WORK MANAGER", "STOP WORK MANAGER=== stopTracking " + CHECK_USAGE_STATUS_WORKER + "_" + SharePrefs.getInstance(context).getString(SharePrefs.APP_ID));
             WorkManager.getInstance(context).cancelAllWorkByTag(CHECK_USAGE_STATUS_WORKER + "_" + SharePrefs.getInstance(context).getString(SharePrefs.APP_ID));
         } catch (Exception e) {
             e.printStackTrace();
@@ -44,7 +44,7 @@ public class AppTrackingSetup {
         PeriodicWorkRequest photoCheckWork = photoCheckBuilder.build();
         WorkManager instance = WorkManager.getInstance(context);
         instance.enqueueUniquePeriodicWork(tag, ExistingPeriodicWorkPolicy.KEEP, photoCheckWork);
-        Logger.getInstance().e("PLAYTIME SDK schedulePeriodicWork", "schedulePeriodicWork=== Worker is scheduled :" + CHECK_USAGE_STATUS_WORKER + "_" + SharePrefs.getInstance(context).getString(SharePrefs.APP_ID));
+//        Logger.getInstance().e("PLAYTIME SDK schedulePeriodicWork", "schedulePeriodicWork=== Worker is scheduled :" + CHECK_USAGE_STATUS_WORKER + "_" + SharePrefs.getInstance(context).getString(SharePrefs.APP_ID));
     }
 
     private static boolean isWorkScheduled(Context context, String tag) {
@@ -56,7 +56,7 @@ public class AppTrackingSetup {
             for (WorkInfo workInfo : workInfoList) {
                 WorkInfo.State state = workInfo.getState();
                 running = state == WorkInfo.State.RUNNING | state == WorkInfo.State.ENQUEUED;
-                Logger.getInstance().e("PLAYTIME SDK isWorkScheduled", "isWorkScheduled=== " + tag + " Worker is already scheduled");
+//                Logger.getInstance().e("PLAYTIME SDK isWorkScheduled", "isWorkScheduled=== " + tag + " Worker is already scheduled");
             }
             return running;
         } catch (ExecutionException e) {

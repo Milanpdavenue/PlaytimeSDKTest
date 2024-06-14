@@ -18,6 +18,8 @@ public class SharePrefs {
     public static String IS_CONSENT_GIVEN = "IS_CONSENT_GIVEN";
     public static String CONSENT_TITLE = "CONSENT_TITLE";
     public static String CONSENT_MESSAGE = "CONSENT_MESSAGE";
+    public static String ONGOING_OFFER_COUNT = "ONGOING_OFFER_COUNT";
+    public static String LAST_SYNC_TIME = "LAST_SYNC_TIME";
 
     public static SharePrefs getInstance(Context c) {
         if (instance != null) {
@@ -53,5 +55,13 @@ public class SharePrefs {
 
     public int getInt(String key) {
         return pref.getInt(key, 0);
+    }
+
+    public void putLong(String key, long val) {
+        pref.edit().putLong(key, val).apply();
+    }
+
+    public long getLong(String key) {
+        return pref.getLong(key, 0);
     }
 }

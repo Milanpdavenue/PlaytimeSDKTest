@@ -12,18 +12,18 @@ public class UsageTrackingWorkManager extends Worker {
 
     public UsageTrackingWorkManager(@androidx.annotation.NonNull Context context, @androidx.annotation.NonNull WorkerParameters workerParams) {
         super(context, workerParams);
-        Logger.getInstance().e(TAG, "PLAYTIME SDK Work Manager Constructor Called==" + workerParams.getId());
+//        Logger.getInstance().e(TAG, "PLAYTIME SDK Work Manager Constructor Called==" + workerParams.getId());
     }
 
     @androidx.annotation.NonNull
     @Override
     public Result doWork() {
-        Logger.getInstance().e(TAG, "PLAYTIME SDK Work Manager doWork() Called==");
-        Logger.getInstance().e("=============================", "=================SYNC LOCAL DATA WITH SERVER====================");
+//        Logger.getInstance().e(TAG, "PLAYTIME SDK Work Manager doWork() Called==");
+//        Logger.getInstance().e("=============================", "=================SYNC LOCAL DATA WITH SERVER====================");
         if (!SharePrefs.getInstance(getApplicationContext()).getBoolean(SharePrefs.IS_SYNC_IN_PROGRESS)) {
             new SyncDataUtils().syncData(getApplicationContext());
         }
-        Logger.getInstance().e("getOnGoingApps Result.success ==>", "WORK MANAGER SUCCESS");
+//        Logger.getInstance().e("getOnGoingApps Result.success ==>", "WORK MANAGER SUCCESS");
         return Result.success(null);
     }
 }

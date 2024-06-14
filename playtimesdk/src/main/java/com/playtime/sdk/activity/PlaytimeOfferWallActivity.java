@@ -32,12 +32,12 @@ import com.facebook.shimmer.ShimmerFrameLayout;
 import com.playtime.sdk.AppTrackingSetup;
 import com.playtime.sdk.PlaytimeSDK;
 import com.playtime.sdk.R;
+import com.playtime.sdk.SyncDataUtils;
 import com.playtime.sdk.async.ClickOfferAsync;
 import com.playtime.sdk.database.PartnerApps;
 import com.playtime.sdk.repositories.PartnerAppsRepository;
 import com.playtime.sdk.utils.CommonUtils;
 import com.playtime.sdk.utils.Constants;
-import com.playtime.sdk.utils.Logger;
 import com.playtime.sdk.utils.SharePrefs;
 
 import org.json.JSONException;
@@ -184,6 +184,8 @@ public class PlaytimeOfferWallActivity extends AppCompatActivity {
                                     CommonUtils.showConsentPopup(PlaytimeOfferWallActivity.this, SharePrefs.getInstance(PlaytimeOfferWallActivity.this).getString(SharePrefs.CONSENT_TITLE), SharePrefs.getInstance(PlaytimeOfferWallActivity.this).getString(SharePrefs.CONSENT_MESSAGE));
                                 }
                             }, 1500);
+                        } else {
+                            askUsagePermissionAndResumePlaytimeUsage();
                         }
                     }
                     isFirstTime = false;
@@ -197,6 +199,16 @@ public class PlaytimeOfferWallActivity extends AppCompatActivity {
 //        registerDeviceStatusBroadCast();
     }
 
+    public void askUsagePermissionAndResumePlaytimeUsage() {
+        if (SharePrefs.getInstance(PlaytimeOfferWallActivity.this).getInt(SharePrefs.ONGOING_OFFER_COUNT) > 0 && !CommonUtils.isUsageStatsPermissionGranted(PlaytimeOfferWallActivity.this)) {
+            CommonUtils.requestUsageStatsPermission(PlaytimeOfferWallActivity.this, getPackageName(), "To track playtime offers you need to give Usage Access Permission. Kindly go to settings screen and turn on toggle button to allow this permission.");
+        }
+        if (SharePrefs.getInstance(PlaytimeOfferWallActivity.this).getInt(SharePrefs.ONGOING_OFFER_COUNT) > 0) {
+            AppTrackingSetup.startAppTracking(PlaytimeOfferWallActivity.this);
+            PlaytimeSDK.getInstance().setTimer();
+        }
+    }
+
     public class JSInterface {
         @JavascriptInterface
         public void onOfferClicked(String offerId, String screenNo, String url, String offer_type, String offerDetails, String packageName) {
@@ -206,10 +218,14 @@ public class PlaytimeOfferWallActivity extends AppCompatActivity {
                         return;
                     }
                     mLastClickTime = SystemClock.elapsedRealtime();
-                    boolean shouldTrackUsage = offer_type.equals(Constants.OFFER_TYPE_PLAYTIME) || offer_type.equals(Constants.OFFER_TYPE_DAY);
-                    if (!CommonUtils.isStringNullOrEmpty(offer_type) && shouldTrackUsage && !CommonUtils.isUsageStatsPermissionGranted(PlaytimeOfferWallActivity.this)) {
-                        CommonUtils.requestUsageStatsPermission(PlaytimeOfferWallActivity.this, applicationName,"To track this offer you need to give Usage Access Permission. Kindly go to settings screen and turn on toggle button to allow this permission.");
-                        return;
+                    try {
+                        boolean shouldTrackUsage = offer_type.equals(Constants.OFFER_TYPE_PLAYTIME) || offer_type.equals(Constants.OFFER_TYPE_DAY);
+                        if (!CommonUtils.isStringNullOrEmpty(offer_type) && shouldTrackUsage && !CommonUtils.isUsageStatsPermissionGranted(PlaytimeOfferWallActivity.this)) {
+                            CommonUtils.requestUsageStatsPermission(PlaytimeOfferWallActivity.this, applicationName, "To track this offer you need to give Usage Access Permission. Kindly go to settings screen and turn on toggle button to allow this permission.");
+                            return;
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
                     }
                     if (!CommonUtils.isStringNullOrEmpty(offerDetails)) {
                         PartnerApps objPartnerApp = getPartnerApps(offerDetails);
@@ -280,7 +296,7 @@ public class PlaytimeOfferWallActivity extends AppCompatActivity {
                                     public void run() {
                                         if (CommonUtils.isNetworkAvailable(PlaytimeOfferWallActivity.this)) {
                                             String url1 = url + "&is_offer_installed=" + (CommonUtils.isPackageInstalled(PlaytimeOfferWallActivity.this, packageName) ? 1 : 0);
-                                            Logger.getInstance().e("DETAILS URL:","===DETAILS URL===="+url1+" package : "+packageName);
+//                                            Logger.getInstance().e("DETAILS URL:","===DETAILS URL===="+url1+" package : "+packageName);
                                             webViewPage.loadUrl(url1);
                                         } else {
                                             CommonUtils.setToast(PlaytimeOfferWallActivity.this, "No internet connection");
@@ -295,6 +311,14 @@ public class PlaytimeOfferWallActivity extends AppCompatActivity {
                                 CommonUtils.openPlayStore(PlaytimeOfferWallActivity.this, packageName);
                                 String newUrl = url.replace("CLICK_TIME", String.valueOf(Calendar.getInstance().getTimeInMillis()));
                                 new ClickOfferAsync(newUrl);
+                                break;
+                            case "7": // sync usage data
+                                if (!SharePrefs.getInstance(PlaytimeOfferWallActivity.this).getBoolean(SharePrefs.IS_SYNC_IN_PROGRESS)) {
+                                    new SyncDataUtils().syncData(PlaytimeOfferWallActivity.this);
+                                }
+                                break;
+                            case "8": // start timer and work manager
+                                new PartnerAppsRepository(PlaytimeOfferWallActivity.this).startTracking(PlaytimeOfferWallActivity.this);
                                 break;
                         }
                     }
@@ -338,8 +362,19 @@ public class PlaytimeOfferWallActivity extends AppCompatActivity {
         return objPartnerApp;
     }
 
+    @Override
     protected void onResume() {
         super.onResume();
+        try {
+//            Logger.getInstance().e("PLAY TIME SDK: ", "onResume isTimer ON: ==>" + PlaytimeSDK.getInstance().getTimer() + " isTimeElapsed : " + ((Calendar.getInstance().getTimeInMillis() - SharePrefs.getInstance(PlaytimeOfferWallActivity.this).getLong(SharePrefs.LAST_SYNC_TIME)) > (1.2 * 60 * 1000L)));
+            if (SharePrefs.getInstance(PlaytimeOfferWallActivity.this).getInt(SharePrefs.ONGOING_OFFER_COUNT) > 0 && (Calendar.getInstance().getTimeInMillis() - SharePrefs.getInstance(PlaytimeOfferWallActivity.this).getLong(SharePrefs.LAST_SYNC_TIME)) > (1.2 * 60 * 1000L)) {
+                PlaytimeSDK.getInstance().stopTimer();
+                PlaytimeSDK.getInstance().setContext(PlaytimeOfferWallActivity.this);// set context because when process gets stop, it set null to context
+                PlaytimeSDK.getInstance().setTimer();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     boolean doubleBackToExitPressedOnce = false;

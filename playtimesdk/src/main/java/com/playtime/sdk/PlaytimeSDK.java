@@ -29,7 +29,6 @@ import com.playtime.sdk.network.ApiInterface;
 import com.playtime.sdk.utils.CommonUtils;
 import com.playtime.sdk.utils.Constants;
 import com.playtime.sdk.utils.Encryption;
-import com.playtime.sdk.utils.Logger;
 import com.playtime.sdk.utils.SharePrefs;
 
 import org.json.JSONObject;
@@ -91,8 +90,15 @@ public class PlaytimeSDK {
 
     public void stopTimer() {
         if (timer != null) {
+//            Logger.getInstance().e("PLAY TIME SDK: ", "STOP TIMER==>");
             timer.cancel();
             timer = null;
+        }
+    }
+
+    public void setContext(Context c) {
+        if (context == null) {
+            this.context = c;
         }
     }
 
@@ -103,12 +109,13 @@ public class PlaytimeSDK {
                     @Override
                     public void run() {
                         if (timer == null) {
+//                            Logger.getInstance().e("PLAY TIME SDK: ", "START TIMER==>");
                             timer = new CountDownTimer((30 * 60 * 1000L), (60 * 1000L)) {
                                 @Override
                                 public void onTick(long millisUntilFinished) {
                                     try {
                                         if (CommonUtils.isNetworkAvailable(context)) {
-                                            Logger.getInstance().e(" START SYNC FROM TIMER ==>", "START SYNC FROM TIMER");
+//                                            Logger.getInstance().e(" START SYNC FROM TIMER ==>", "START SYNC FROM TIMER");
                                             if (!SharePrefs.getInstance(context).getBoolean(SharePrefs.IS_SYNC_IN_PROGRESS)) {
                                                 new SyncDataUtils().syncData(context);
                                             } else {
@@ -184,6 +191,8 @@ public class PlaytimeSDK {
 //                if (context instanceof Activity) {
 //                    ((Activity) context).overridePendingTransition(R.anim.fadein, R.anim.fadeout);
 //                }
+            } else {
+                CommonUtils.setToast(context, "PlaytimeSDK is not initialized");
             }
         } else {
             CommonUtils.setToast(context, "No internet connection");
@@ -290,8 +299,8 @@ public class PlaytimeSDK {
             jObject.put("DFG899", Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID));
             int n = CommonUtils.getRandomNumberBetweenRange(1, 1000000);
             jObject.put("RANDOM", n);
-            Logger.getInstance().e("verifyAppId ORIGINAL ==>", jObject.toString());
-            Logger.getInstance().e("verifyAppId ENCRYPTED ==>", cipher.bytesToHex(cipher.encrypt(jObject.toString())));
+//            Logger.getInstance().e("verifyAppId ORIGINAL ==>", jObject.toString());
+//            Logger.getInstance().e("verifyAppId ENCRYPTED ==>", cipher.bytesToHex(cipher.encrypt(jObject.toString())));
             Call<ApiResponse> call = apiService.verifyAppId(userId, String.valueOf(n), cipher.bytesToHex(cipher.encrypt(jObject.toString())));
             call.enqueue(new Callback<ApiResponse>() {
                 @Override
@@ -319,7 +328,7 @@ public class PlaytimeSDK {
         try {
             Encryption cipher = new Encryption();
             ResponseModel responseModel = new Gson().fromJson(new String(cipher.decrypt(apiResponse.getEncrypt())), ResponseModel.class);
-            Logger.getInstance().e("verifyAppId responseModel: ", "responseModel: " + responseModel);
+//            Logger.getInstance().e("verifyAppId responseModel: ", "responseModel: " + responseModel);
             if (responseModel.getStatus().equals(Constants.STATUS_SUCCESS)) {
                 defaultUrl = buildUrl(gaIdStr, appId, responseModel.getUuid());
                 SharePrefs.getInstance(context).putString(SharePrefs.APP_ID, appId);
@@ -329,16 +338,10 @@ public class PlaytimeSDK {
                 SharePrefs.getInstance(context).putString(SharePrefs.USER_ID, userId);
                 SharePrefs.getInstance(context).putString(SharePrefs.CONSENT_TITLE, responseModel.getConsentTitle());
                 SharePrefs.getInstance(context).putString(SharePrefs.CONSENT_MESSAGE, responseModel.getConsentMessage());
+                SharePrefs.getInstance(context).putInt(SharePrefs.ONGOING_OFFER_COUNT, responseModel.getOnGoingOfferCount());
                 isInitialized = true;
                 if (listener != null) {
                     listener.onInitSuccess();
-                }
-                if (responseModel.getOnGoingOfferCount() > 0 && !CommonUtils.isUsageStatsPermissionGranted(context)) {
-                    CommonUtils.requestUsageStatsPermission(context, context.getPackageName(), "To track playtime offers you need to give Usage Access Permission. Kindly go to settings screen and turn on toggle button to allow this permission.");
-                }
-                if (timer == null && responseModel.getOnGoingOfferCount() > 0) {
-                    AppTrackingSetup.startAppTracking(context);
-                    setTimer();
                 }
             } else if (responseModel.getStatus().equals(Constants.STATUS_MAINTENANCE)) {
                 if (context instanceof Activity) {

@@ -28,4 +28,8 @@ public interface ApiInterface {
 
     @GET
     Call<JsonObject> callAppClickApi(@Url String Value);
+
+    @FormUrlEncoded
+    @POST("ULTAVADAPAVBHAJI")
+    Call<ApiResponse> UpdateFirstOpenOfferStatusAsync(@Header("Token") String token, @Header("Secret") String random, @Field("details") String details);
 }
