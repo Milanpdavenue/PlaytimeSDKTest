@@ -38,6 +38,7 @@ import com.playtime.sdk.database.PartnerApps;
 import com.playtime.sdk.repositories.PartnerAppsRepository;
 import com.playtime.sdk.utils.CommonUtils;
 import com.playtime.sdk.utils.Constants;
+import com.playtime.sdk.utils.Logger;
 import com.playtime.sdk.utils.SharePrefs;
 
 import org.json.JSONException;
@@ -366,6 +367,7 @@ public class PlaytimeOfferWallActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         try {
+            Logger.getInstance().e("test","test");
 //            Logger.getInstance().e("PLAY TIME SDK: ", "onResume isTimer ON: ==>" + PlaytimeSDK.getInstance().getTimer() + " isTimeElapsed : " + ((Calendar.getInstance().getTimeInMillis() - SharePrefs.getInstance(PlaytimeOfferWallActivity.this).getLong(SharePrefs.LAST_SYNC_TIME)) > (1.2 * 60 * 1000L)));
             if (SharePrefs.getInstance(PlaytimeOfferWallActivity.this).getInt(SharePrefs.ONGOING_OFFER_COUNT) > 0 && (Calendar.getInstance().getTimeInMillis() - SharePrefs.getInstance(PlaytimeOfferWallActivity.this).getLong(SharePrefs.LAST_SYNC_TIME)) > (1.2 * 60 * 1000L)) {
                 PlaytimeSDK.getInstance().stopTimer();
